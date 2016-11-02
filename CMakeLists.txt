@@ -41,3 +41,6 @@ target_link_libraries(sample_app mqtt_app)
 
 add_executable(event_app event_app.cpp)
 target_link_libraries(event_app mqtt_app)
+
+add_executable(lua_app lua_app.cpp)
+target_link_libraries(lua_app lua5.3 mqtt_app)
