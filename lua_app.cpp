@@ -29,6 +29,8 @@ int main(int argc, char* argv[])
 
 	app.run();
 
+	std::cout << "Exiting\n";
+
 	return 0;
 }
 

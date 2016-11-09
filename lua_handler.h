@@ -27,7 +27,13 @@ public:
 		luaopen_mylib(L_, this);
 
 		luaL_loadfile(L_, file_name.c_str());
-		lua_pcall(L_, 0, 0, 0);
+		if (lua_pcall(L_, 0, 0, 0) != LUA_OK)
+		{
+			const char* err_msg = lua_tostring(L_, -1);
+			if (err_msg)
+				std::cout << err_msg << std::endl;
+			lua_pop(L_, 1);
+		}
 	}
 
 	~lua_handler()
@@ -54,7 +60,34 @@ private:
 		});
 
 	}
+	static void stackDump (lua_State *L) {
+		int i;
+		int top = lua_gettop(L);
+		for (i = 1; i <= top; i++) {  /* repeat for each level */
+			int t = lua_type(L, i);
+			switch (t) {
 
+				case LUA_TSTRING:  /* strings */
+					printf("`%s'", lua_tostring(L, i));
+					break;
+
+				case LUA_TBOOLEAN:  /* booleans */
+					printf(lua_toboolean(L, i) ? "true" : "false");
+					break;
+
+				case LUA_TNUMBER:  /* numbers */
+					printf("%g", lua_tonumber(L, i));
+					break;
+
+				default:  /* other values */
+					printf("%s", lua_typename(L, t));
+					break;
+
+			}
+			printf("  ");  /* put a separator */
+		}
+		printf("\n");  /* end the listing */
+	}
 	void handle_event(const std::string& topic, mqtt::message_ptr msg)
 	{
 		std::vector<std::string> parts;
@@ -76,7 +109,14 @@ private:
 		lua_pushstring(L_, parts.at(0).c_str());
 		lua_pushnumber(L_, boost::lexical_cast<int>(parts.at(2).c_str()));
 		lua_pushnumber(L_, boost::lexical_cast<int>(msg->get_payload()));
-		lua_pcall(L_, 3, 0, 0);
+		if (lua_pcall(L_, 3, 0, 0) != LUA_OK)
+		{
+			const char* err_msg = lua_tostring(L_, -1);
+			if (err_msg)
+				std::cout << err_msg << std::endl;
+			lua_pop(L_, 1);
+			stackDump(L_);
+		}
 	}
 
 	void send_switch_command(const std::string& s, size_t channel, const std::string& command)
