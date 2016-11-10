@@ -46,6 +46,10 @@ function CSwitch:dec(delta)
 	bus.send_switch_command(self.switch, self.channel, 'dec ' .. delta)
 end
 
+function CSwitch:get_state()
+	return self.state
+end
+
 function Switch(name, switch, channel)
 	s = CSwitch.new(switch, channel)
 	switches[name] = s

@@ -1,5 +1,3 @@
-switches = {}
-
 CSwitchController = {}
 CSwitchController.__index = CSwitchController
 
