@@ -3,11 +3,7 @@
 #include "mqtt_connection.h"
 #include "util.h"
 
-extern "C" {
-#include <lua5.3/lua.h>
-#include <lua5.3/lualib.h>
-#include <lua5.3/lauxlib.h>
-}
+#include "selene.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <iostream>
@@ -15,31 +11,26 @@ extern "C" {
 class lua_handler
 {
 public:
-	lua_handler(mqtt_connection& conn, const std::string& file_name)
+	lua_handler(mqtt_connection& conn, const std::string& main_dir, const std::string& config_file)
 		: connection_(conn)
+		, L_(true)
 	{
 		using namespace std::placeholders;
 		conn.set_on_connected(std::bind(&lua_handler::subscribe, this));
 		conn.set_on_message(std::bind(&lua_handler::handle_event, this, _1, _2));
 
-		L_ = luaL_newstate();
-		luaL_openlibs(L_);
-		luaopen_mylib(L_, this);
+		L_["bus"].SetObj(*this, "send_switch_command", &lua_handler::send_switch_command);
+		L_["MAIN_DIR"] = main_dir + "/?;" + main_dir + "/?.lua";
+		L_["EV_KEY_RELEASE"] = 0;
+		L_["EV_KEY_PRESS"] = 1;
+		L_["EV_KEY_REPEAT"] = 2;
 
-		luaL_loadfile(L_, file_name.c_str());
-		if (lua_pcall(L_, 0, 0, 0) != LUA_OK)
-		{
-			const char* err_msg = lua_tostring(L_, -1);
-			if (err_msg)
-				std::cout << err_msg << std::endl;
-			lua_pop(L_, 1);
-		}
+		L_.Load(main_dir + "/Main.lua");
+		L_.Load(config_file);
 	}
 
 	~lua_handler()
 	{
-		lua_close(L_);
-
 		connection_.set_on_connected(std::function<void ()>());
 		connection_.set_on_message(std::function<void (const std::string&, mqtt::message_ptr)>());
 
@@ -60,66 +51,30 @@ private:
 		});
 
 	}
-	static void stackDump (lua_State *L) {
-		int i;
-		int top = lua_gettop(L);
-		for (i = 1; i <= top; i++) {  /* repeat for each level */
-			int t = lua_type(L, i);
-			switch (t) {
 
-				case LUA_TSTRING:  /* strings */
-					printf("`%s'", lua_tostring(L, i));
-					break;
-
-				case LUA_TBOOLEAN:  /* booleans */
-					printf(lua_toboolean(L, i) ? "true" : "false");
-					break;
-
-				case LUA_TNUMBER:  /* numbers */
-					printf("%g", lua_tonumber(L, i));
-					break;
-
-				default:  /* other values */
-					printf("%s", lua_typename(L, t));
-					break;
-
-			}
-			printf("  ");  /* put a separator */
-		}
-		printf("\n");  /* end the listing */
-	}
 	void handle_event(const std::string& topic, mqtt::message_ptr msg)
 	{
 		std::vector<std::string> parts;
 		boost::split(parts, topic, [](char c) { return c == '/'; });
+		const char* function;
 
 		if (parts.at(1) == "switch")
 		{
-			lua_getglobal(L_, "on_switch_state_changed");
+			function = "on_switch_state_changed";
 		}
 		else if (parts.at(1) == "event")
 		{
-			lua_getglobal(L_, "on_key_event");
+			function = "on_key_event";
 		}
 		else
 		{
 			return;
 		}
 
-		lua_pushstring(L_, parts.at(0).c_str());
-		lua_pushnumber(L_, boost::lexical_cast<int>(parts.at(2).c_str()));
-		lua_pushnumber(L_, boost::lexical_cast<int>(msg->get_payload()));
-		if (lua_pcall(L_, 3, 0, 0) != LUA_OK)
-		{
-			const char* err_msg = lua_tostring(L_, -1);
-			if (err_msg)
-				std::cout << err_msg << std::endl;
-			lua_pop(L_, 1);
-			stackDump(L_);
-		}
+		L_[function](parts.at(0), boost::lexical_cast<int>(parts.at(2)), boost::lexical_cast<int>(msg->get_payload()));
 	}
 
-	void send_switch_command(const std::string& s, size_t channel, const std::string& command)
+	void send_switch_command(std::string s, int channel, std::string command)
 	{
 		noexception([&]()
 		{
@@ -128,34 +83,7 @@ private:
 		});
 	}
 
-	static int send_switch_command(lua_State *L)
-	{
-		lua_handler* this_ = static_cast<lua_handler*>(lua_touserdata(L, lua_upvalueindex(1)));
-		std::string s = lua_tostring(L, -3);
-		size_t channel = lua_tointeger(L, -2);
-		std::string command = lua_tostring(L, -1);
-
-		this_->send_switch_command(s, channel, command);
-		return 0;
-	}
-
-	int luaopen_mylib (lua_State *L, lua_handler* h)
-	{
-		static const struct luaL_Reg bus [] =
-		{
-			{"send_switch_command", &send_switch_command},
-			{NULL, NULL}  /* sentinel */
-		};
-
-		luaL_newlibtable(L, bus);
-		lua_pushlightuserdata(L, h);
-		luaL_setfuncs(L, bus, 1);
-		lua_setglobal(L, "bus");
-		return 0;
-	}
-
-
 	mqtt_connection& connection_;
-	lua_State* L_;
+	sel::State L_;
 };
 

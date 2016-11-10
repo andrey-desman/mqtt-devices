@@ -17,13 +17,13 @@ int main(int argc, char* argv[])
 	options opt(client_id, broker);
 
 	{
-		po::options_description positional("Event");
-		positional.add_options()
+		po::options_description ev_opt("Event");
+		ev_opt.add_options()
 			("evdev,e", po::value<std::string>(&event_path)->required(), "Path to input device event node")
 			("grab,g", po::bool_switch(&grab)->default_value(false), "Grab device for exclusive access")
 			("repeat,r", po::value<std::vector<int> >(&repeat)->multitoken(), "Delay/repeat interval in milliseconds, e.g. -r 1200 600")
 		;
-		opt.add(positional);
+		opt.add(ev_opt);
 
 		po::variables_map vm;
 

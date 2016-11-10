@@ -10,10 +10,19 @@ int main(int argc, char* argv[])
 
 	std::string broker;
 	std::string client_id;
+	std::string main_dir;
+	std::string config_file;
 
 	options opt(client_id, broker);
 
 	{
+		po::options_description ev_opt("Event");
+		ev_opt.add_options()
+			("lua-path,l", po::value<std::string>(&main_dir)->default_value("/etc/mqttlua"), "Path to main lua handler code")
+			("def,d", po::value<std::string>(&config_file)->required(), "Path to controller configuration file")
+		;
+		opt.add(ev_opt);
+
 		po::variables_map vm;
 
 		if (!opt.parse(argc, argv, vm))
@@ -25,7 +34,7 @@ int main(int argc, char* argv[])
 	ev::default_loop loop;
 	mqtt_app app(loop, broker, client_id);
 
-	lua_handler l(app.connection(), "test.lua");
+	lua_handler l(app.connection(), main_dir, config_file);
 
 	app.run();
 
