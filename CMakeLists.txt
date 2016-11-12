@@ -43,6 +43,9 @@ add_subdirectory(lib)
 add_executable(sample_app sample_app.cpp)
 target_link_libraries(sample_app mqtt_app)
 
+add_executable(kmtronic_usb_relay kmtronic_usb_relay.cpp kmtronic_usb_relay_app.cpp)
+target_link_libraries(kmtronic_usb_relay mqtt_app)
+
 add_executable(event_app event_app.cpp)
 target_link_libraries(event_app mqtt_app)
 
