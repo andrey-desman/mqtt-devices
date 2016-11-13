@@ -50,6 +50,9 @@ target_link_libraries(kmtronic_usb_relay mqtt_app)
 add_executable(hd0742m_dimmer hd0742m_dimmer.cpp hd0742m_dimmer_app.cpp)
 target_link_libraries(hd0742m_dimmer mqtt_app)
 
+add_executable(noname_rs485_2ch_relay noname_rs485_2ch_relay.cpp noname_rs485_2ch_relay_app.cpp)
+target_link_libraries(noname_rs485_2ch_relay mqtt_app)
+
 add_executable(event_app event_app.cpp)
 target_link_libraries(event_app mqtt_app)
 
