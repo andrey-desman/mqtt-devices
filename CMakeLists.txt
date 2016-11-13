@@ -33,6 +33,7 @@ SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 
+find_add_library(MBUS mbus mbus.h)
 find_add_library(PAHO_C_ASYNC paho-mqtt3a MQTTAsync.h)
 find_add_library(EV ev ev++.h)
 find_add_library(PAHO_CPP mqttpp mqtt/async_client.h)
@@ -45,6 +46,9 @@ target_link_libraries(sample_app mqtt_app)
 
 add_executable(kmtronic_usb_relay kmtronic_usb_relay.cpp kmtronic_usb_relay_app.cpp)
 target_link_libraries(kmtronic_usb_relay mqtt_app)
+
+add_executable(hd0742m_dimmer hd0742m_dimmer.cpp hd0742m_dimmer_app.cpp)
+target_link_libraries(hd0742m_dimmer mqtt_app)
 
 add_executable(event_app event_app.cpp)
 target_link_libraries(event_app mqtt_app)
