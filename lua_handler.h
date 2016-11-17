@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lua_timer.h"
 #include "mqtt_connection.h"
 #include "util.h"
 
@@ -11,7 +12,7 @@
 class lua_handler
 {
 public:
-	lua_handler(mqtt_connection& conn, const std::string& main_dir, const std::string& config_file)
+	lua_handler(mqtt_connection& conn, ev::loop_ref& loop, const std::string& main_dir, const std::string& config_file)
 		: connection_(conn)
 		, L_(true)
 	{
@@ -19,11 +20,19 @@ public:
 		conn.set_on_connected(std::bind(&lua_handler::subscribe, this));
 		conn.set_on_message(std::bind(&lua_handler::handle_event, this, _1, _2));
 
-		L_["bus"].SetObj(*this, "send_switch_command", &lua_handler::send_switch_command);
+		LuaTimer::set_loop(&loop);
+
 		L_["MAIN_DIR"] = main_dir + "/?;" + main_dir + "/?.lua";
 		L_["EV_KEY_RELEASE"] = 0;
 		L_["EV_KEY_PRESS"] = 1;
 		L_["EV_KEY_REPEAT"] = 2;
+
+		L_["bus"].SetObj(*this,
+			"send_switch_command", &lua_handler::send_switch_command);
+
+		L_["Timer"].SetClass<LuaTimer, sel::function<void ()> >(
+			"start", &LuaTimer::start,
+			"stop", &LuaTimer::stop);
 
 		L_.Load(main_dir + "/Main.lua");
 		L_.Load(config_file);
@@ -83,6 +92,7 @@ private:
 		});
 	}
 
+private:
 	mqtt_connection& connection_;
 	sel::State L_;
 };

@@ -56,7 +56,7 @@ target_link_libraries(noname_rs485_2ch_relay mqtt_app)
 add_executable(event_app event_app.cpp)
 target_link_libraries(event_app mqtt_app)
 
-add_executable(lua_app lua_app.cpp)
+add_executable(lua_app lua_app.cpp lua_timer.cpp)
 target_link_libraries(lua_app ${LUA_LIB} mqtt_app)
 
 add_custom_command(

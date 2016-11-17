@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 	ev::default_loop loop;
 	mqtt_app app(loop, broker, client_id);
 
-	lua_handler l(app.connection(), main_dir, config_file);
+	lua_handler l(app.connection(), loop, main_dir, config_file);
 
 	app.run();
 
