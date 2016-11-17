@@ -37,12 +37,12 @@ function CSwitch:set(value)
 end
 
 function CSwitch:inc(delta)
-	if not delta then delta = 10 end
+	delta = delta or 10
 	bus.send_switch_command(self.switch, self.channel, 'inc ' .. delta)
 end
 
 function CSwitch:dec(delta)
-	if not delta then delta = 10 end
+	delta = delta or 10
 	bus.send_switch_command(self.switch, self.channel, 'dec ' .. delta)
 end
 
@@ -50,11 +50,15 @@ function CSwitch:get_state()
 	return self.state
 end
 
-function Switch(name, switch, channel)
-	s = CSwitch.new(switch, channel)
-	switches[name] = s
-	switches[id(switch, channel)] = s
+function Switch(t)
+	assert(t.name, "Switch: Missing name")
+	assert(t.device, "SwitchController: Missing device")
+	assert(t.channel, "SwitchController: Missing channel")
 
-	register_switch_state_handler(switch, channel, s)
+	s = CSwitch.new(t.device, t.channel)
+	switches[t.name] = s
+	switches[id(t.device, t.channel)] = s
+
+	register_switch_state_handler(t.device, t.channel, s)
 end
 

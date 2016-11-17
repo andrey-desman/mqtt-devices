@@ -27,7 +27,13 @@ function CTimedSwitchController.new(switch, timeout)
    return s
 end
 
-function TimedSwitchController(switch_name, keyboard, key, timeout)
-	local c = CTimedSwitchController.new(switches[switch_name], timeout)
-	register_event_handler(keyboard, key, c)
+function TimedSwitchController(t)
+	assert(t.switch, "TimedSwitchController: Missing switch")
+	assert(switches[t.switch], "TimedSwitchController: Unknown switch " .. t.switch)
+	assert(t.timeout, "TimedSwitchController: Missing timeout")
+	assert(t.keyboard, "TimedSwitchController: Missing keyboard")
+	assert(t.key, "TimedSwitchController: Missing key")
+
+	local c = CTimedSwitchController.new(switches[t.switch], t.timeout)
+	register_event_handler(t.keyboard, t.key, c)
 end

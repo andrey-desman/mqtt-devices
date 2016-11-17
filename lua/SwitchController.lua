@@ -14,7 +14,12 @@ function CSwitchController.new(switch)
    return s
 end
 
-function SwitchController(switch_name, keyboard, key)
+function SwitchController(t)
+	assert(t.switch, "SwitchController: Missing switch")
+	assert(switches[t.switch], "SwitchController: Unknown switch " .. t.switch)
+	assert(t.keyboard, "SwitchController: Missing keyboard")
+	assert(t.key, "SwitchController: Missing key")
+
 	local c = CSwitchController.new(switches[switch_name])
 	register_event_handler(keyboard, key, c)
 end

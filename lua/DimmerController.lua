@@ -22,9 +22,9 @@ function CDimmerController:__call(event)
 			self.gradual = true
 		end
 		if self.dim_up then
-			if state < 100 then self.switch:inc() end
+			if state < 100 then self.switch:inc(self.interval) end
 		else
-			if state > 0 then self.switch:dec() end
+			if state > 0 then self.switch:dec(self.interval) end
 		end
 	end
 end
@@ -38,7 +38,13 @@ function CDimmerController.new(switch)
    return s
 end
 
-function DimmerController(switch_name, keyboard, key)
-	local c = CDimmerController.new(switches[switch_name])
-	register_event_handler(keyboard, key, c)
+function DimmerController(t)
+	assert(t.switch, "DimmerController: Missing switch")
+	assert(switches[t.switch], "DimmerController: Unknown switch " .. t.switch)
+	assert(t.keyboard, "DimmerController: Missing keyboard")
+	assert(t.key, "DimmerController: Missing key")
+
+	local c = CDimmerController.new(switches[t.switch])
+	c.interval = math.floor(t.interval)
+	register_event_handler(t.keyboard, t.key, c)
 end
