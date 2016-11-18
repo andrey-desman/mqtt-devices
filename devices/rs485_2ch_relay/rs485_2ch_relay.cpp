@@ -1,8 +1,8 @@
-#include "noname_rs485_2ch_relay.h"
+#include "rs485_2ch_relay.h"
 
 #include <algorithm>
 
-noname_rs485_2ch_relay::noname_rs485_2ch_relay(const std::string& server_addr, uint16_t port, uint16_t slave_addr)
+rs485_2ch_relay::rs485_2ch_relay(const std::string& server_addr, uint16_t port, uint16_t slave_addr)
 	: mbus_switch(server_addr, port, slave_addr)
 {
 	std::fill(&state_[0], &state_[CHANNEL_COUNT], false);
@@ -15,7 +15,7 @@ noname_rs485_2ch_relay::noname_rs485_2ch_relay(const std::string& server_addr, u
 #endif
 }
 
-void noname_rs485_2ch_relay::set_channel_state(size_t channel, size_t value)
+void rs485_2ch_relay::set_channel_state(size_t channel, size_t value)
 {
 	static uint16_t cmd[] = { 0x0200, 0x0100 };
 	state_[channel] = value;

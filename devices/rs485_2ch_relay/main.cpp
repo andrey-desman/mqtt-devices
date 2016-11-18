@@ -1,5 +1,5 @@
 #include "mqtt_switch_app.h"
-#include "noname_rs485_2ch_relay.h"
+#include "rs485_2ch_relay.h"
 
 #include "options.h"
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	}
 
 	ev::default_loop loop;
-	noname_rs485_2ch_relay relay(server_addr, server_port, slave_addr);
+	rs485_2ch_relay relay(server_addr, server_port, slave_addr);
 
 	mqtt_switch_app app(loop, broker, client_id, relay);
 

@@ -27,6 +27,7 @@ macro(find_add_library var lib header)
 endmacro(find_add_library)
 
 include_directories(lib)
+include_directories(devices)
 
 SET( CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined" )
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
@@ -41,26 +42,26 @@ find_add_library(LUA lua5.3 lua5.3/lua.h)
 
 add_subdirectory(lib)
 
-add_executable(sample_app sample_app.cpp)
-target_link_libraries(sample_app mqtt_app)
+add_executable(sample_switch devices/sample/main.cpp)
+target_link_libraries(sample_switch mqtt-device)
 
-add_executable(kmtronic_usb_relay kmtronic_usb_relay.cpp kmtronic_usb_relay_app.cpp)
-target_link_libraries(kmtronic_usb_relay mqtt_app)
+add_executable(kmtronic_usb_relay devices/kmtronic/kmtronic_usb_relay.cpp devices/kmtronic/main.cpp)
+target_link_libraries(kmtronic_usb_relay mqtt-device)
 
-add_executable(hd0742m_dimmer hd0742m_dimmer.cpp hd0742m_dimmer_app.cpp)
-target_link_libraries(hd0742m_dimmer mqtt_app)
+add_executable(hd0742m_dimmer devices/hd0742m/hd0742m_dimmer.cpp devices/hd0742m/main.cpp)
+target_link_libraries(hd0742m_dimmer mqtt-device)
 
-add_executable(noname_rs485_2ch_relay noname_rs485_2ch_relay.cpp noname_rs485_2ch_relay_app.cpp)
-target_link_libraries(noname_rs485_2ch_relay mqtt_app)
+add_executable(rs485_2ch_relay devices/rs485_2ch_relay/rs485_2ch_relay.cpp devices/rs485_2ch_relay/main.cpp)
+target_link_libraries(rs485_2ch_relay mqtt-device)
 
-add_executable(event_app event_app.cpp)
-target_link_libraries(event_app mqtt_app)
+add_executable(keyboard devices/keyboard/mqtt_evdev.cpp devices/keyboard/main.cpp)
+target_link_libraries(keyboard mqtt-device)
 
-add_executable(lua_app lua_app.cpp lua_timer.cpp)
-target_link_libraries(lua_app ${LUA_LIB} mqtt_app)
+add_executable(logic_controller devices/logic_controller/lua_timer.cpp devices/logic_controller/main.cpp)
+target_link_libraries(logic_controller ${LUA_LIB} mqtt-device)
 
 add_custom_command(
-    TARGET lua_app POST_BUILD
+    TARGET logic_controller POST_BUILD
 	COMMAND rm -f ${CMAKE_BINARY_DIR}/lua
 	COMMAND ln -sf ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
 )
