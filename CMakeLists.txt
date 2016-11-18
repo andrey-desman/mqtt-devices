@@ -33,6 +33,7 @@ SET( CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 
 find_package(Boost REQUIRED COMPONENTS program_options)
+include_directories(${Boost_INCLUDE_DIRS})
 
 find_add_library(MBUS mbus mbus.h)
 find_add_library(PAHO_C_ASYNC paho-mqtt3a MQTTAsync.h)
@@ -57,7 +58,10 @@ target_link_libraries(rs485_2ch_relay mqtt-device)
 add_executable(keyboard devices/keyboard/mqtt_evdev.cpp devices/keyboard/main.cpp)
 target_link_libraries(keyboard mqtt-device)
 
-add_executable(logic_controller devices/logic_controller/lua_timer.cpp devices/logic_controller/main.cpp)
+add_executable(logic_controller
+	devices/logic_controller/lua_host.cpp
+	devices/logic_controller/lua_timer.cpp
+	devices/logic_controller/main.cpp)
 target_link_libraries(logic_controller ${LUA_LIB} mqtt-device)
 
 add_custom_command(

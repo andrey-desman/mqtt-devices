@@ -1,8 +1,6 @@
 #include "mqtt_app.h"
 #include "options.h"
-#include "lua_handler.h"
-
-#include <iostream>
+#include "lua_host.h"
 
 int main(int argc, char* argv[])
 {
@@ -34,11 +32,9 @@ int main(int argc, char* argv[])
 	ev::default_loop loop;
 	mqtt_app app(loop, broker, client_id);
 
-	lua_handler l(app.connection(), loop, main_dir, config_file);
+	lua_host host(app.connection(), loop, main_dir, config_file);
 
 	app.run();
-
-	std::cout << "Exiting\n";
 
 	return 0;
 }
