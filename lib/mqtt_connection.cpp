@@ -26,6 +26,8 @@ void mqtt_connection::connect()
 		{
 			caller_.post(on_connected_);
 		}
+
+		connect_timer_.reset();
 	}
 	catch (const mqtt::exception& e)
 	{
@@ -35,10 +37,7 @@ void mqtt_connection::connect()
 			connect_timer_->set<mqtt_connection, &mqtt_connection::connect_timer>(this);
 			connect_timer_->start(5, 5);
 		}
-		return;
 	}
-
-	connect_timer_.reset();
 }
 
 void mqtt_connection::connect_timer(ev::timer& t, int revents)

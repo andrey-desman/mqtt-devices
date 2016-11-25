@@ -6,6 +6,11 @@
 class mqtt_connection: mqtt::callback
 {
 public:
+	typedef std::function<void () noexcept> on_connected_handler;
+	typedef std::function<void () noexcept> on_disconnected_handler;
+	typedef std::function<void (const std::string&, mqtt::message_ptr) noexcept> on_message_handler;
+
+public:
 	mqtt_connection(mqtt::async_client& client, ev::loop_ref& loop, call_queue& caller);
 	mqtt_connection(const mqtt_connection&) = delete;
 	mqtt_connection& operator = (const mqtt_connection&) = delete;
@@ -16,17 +21,17 @@ public:
 		return client_;
 	}
 
-	void set_on_connected(const std::function<void ()>& on_connected)
+	void set_on_connected(const on_connected_handler& on_connected)
 	{
 		on_connected_ = on_connected;
 	}
 
-	void set_on_disconnected(const std::function<void ()>& on_disconnected)
+	void set_on_disconnected(const on_disconnected_handler& on_disconnected)
 	{
 		on_disconnected_ = on_disconnected;
 	}
 
-	void set_on_message(const std::function<void (const std::string&, mqtt::message_ptr)>& on_message)
+	void set_on_message(const on_message_handler& on_message)
 	{
 		on_message_ = on_message;
 	}
