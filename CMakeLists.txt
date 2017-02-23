@@ -20,7 +20,7 @@ function(find_add_library var lib header)
 		message("Library ${lib} not found...")
 		return()
 	else()
-		message("Found library ${lib}")
+		message("Found library ${lib} at ${${var}_LIB}")
 	endif()
 
 	find_path(${var}_INCLUDE ${header})
