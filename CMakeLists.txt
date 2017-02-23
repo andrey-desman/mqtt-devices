@@ -83,3 +83,6 @@ target_link_libraries(logic_controller ${LUA_LIB} mqtt-device)
 #	COMMAND ln -sf ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
 #)
 
+install(TARGETS kmtronic_usb_relay hd0742m_dimmer rs485_2ch_relay keyboard logic_controller
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib)
