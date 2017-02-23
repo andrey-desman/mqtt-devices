@@ -1,6 +1,9 @@
 #pragma once
 
-#include "lua_timer.h"
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+
 #include "mqtt_connection.h"
 
 #include "selene.h"

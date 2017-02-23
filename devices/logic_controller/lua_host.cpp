@@ -1,4 +1,5 @@
 #include "lua_host.h"
+#include "lua_timer.h"
 #include "util.h"
 
 #include <boost/algorithm/string/split.hpp>
