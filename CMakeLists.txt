@@ -77,9 +77,9 @@ add_executable(logic_controller
 	devices/logic_controller/main.cpp)
 target_link_libraries(logic_controller ${LUA_LIB} mqtt-device)
 
-add_custom_command(
-    TARGET logic_controller POST_BUILD
-	COMMAND rm -f ${CMAKE_BINARY_DIR}/lua
-	COMMAND ln -sf ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
-)
+#add_custom_command(
+#    TARGET logic_controller POST_BUILD
+#	COMMAND rm -f ${CMAKE_BINARY_DIR}/lua
+#	COMMAND ln -sf ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
+#)
 
