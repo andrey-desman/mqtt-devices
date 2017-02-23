@@ -37,8 +37,8 @@ mqtt_switch_controller::mqtt_switch_controller(iswitch& s, mqtt_connection& c)
 
 mqtt_switch_controller::~mqtt_switch_controller()
 {
-	connection_.set_on_connected(std::function<void ()>());
-	connection_.set_on_message(std::function<void (const std::string&, mqtt::message_ptr)>());
+	connection_.set_on_connected(mqtt_connection::on_connected_handler());
+	connection_.set_on_message(mqtt_connection::on_message_handler());
 
 	noexception([this]
 		{ connection_.client().unsubscribe(connection_.client().get_client_id() + "/switch/+/command")->wait_for_completion(); });
@@ -87,12 +87,10 @@ void mqtt_switch_controller::handle_command(const std::string& topic, mqtt::mess
 		parts[3] = "state";
 		std::string state = boost::lexical_cast<std::string>(switch_.get_channel_state(channel));
 		connection_.client().publish(boost::join(parts, "/"), state.c_str(), state.size(), 0, true)->wait_for_completion();
-		std::cout << "Got command <" << msg->get_payload() << "> on channel " << channel << "\n";
 
 	}
 	catch (const boost::bad_lexical_cast& e)
 	{
-		// syslog(LOG_ERR | LOG_DAEMON, "Invalid channel: %s", "asd");
 		std::cout << "Bad cast: " << e.what() << std::endl;
 	}
 	catch (const std::out_of_range& e)
