@@ -56,26 +56,26 @@ find_add_library(LUA lua5.3 lua5.3/lua.h)
 
 add_subdirectory(lib)
 
-add_executable(sample_switch devices/sample/main.cpp)
-target_link_libraries(sample_switch mqtt-device)
+add_executable(mqtt_sample_switch devices/sample/main.cpp)
+target_link_libraries(mqtt_sample_switch mqtt-device)
 
-add_executable(kmtronic_usb_relay devices/kmtronic/kmtronic_usb_relay.cpp devices/kmtronic/main.cpp)
-target_link_libraries(kmtronic_usb_relay mqtt-device)
+add_executable(mqtt_kmtronic_usb_relay devices/kmtronic/kmtronic_usb_relay.cpp devices/kmtronic/main.cpp)
+target_link_libraries(mqtt_kmtronic_usb_relay mqtt-device)
 
-add_executable(hd0742m_dimmer devices/hd0742m/hd0742m_dimmer.cpp devices/hd0742m/main.cpp)
-target_link_libraries(hd0742m_dimmer mqtt-device)
+add_executable(mqtt_hd0742m_dimmer devices/hd0742m/hd0742m_dimmer.cpp devices/hd0742m/main.cpp)
+target_link_libraries(mqtt_hd0742m_dimmer mqtt-device)
 
-add_executable(rs485_2ch_relay devices/rs485_2ch_relay/rs485_2ch_relay.cpp devices/rs485_2ch_relay/main.cpp)
-target_link_libraries(rs485_2ch_relay mqtt-device)
+add_executable(mqtt_rs485_2ch_relay devices/rs485_2ch_relay/rs485_2ch_relay.cpp devices/rs485_2ch_relay/main.cpp)
+target_link_libraries(mqtt_rs485_2ch_relay mqtt-device)
 
-add_executable(keyboard devices/keyboard/mqtt_evdev.cpp devices/keyboard/main.cpp)
-target_link_libraries(keyboard mqtt-device)
+add_executable(mqtt_input devices/input/mqtt_evdev.cpp devices/input/main.cpp)
+target_link_libraries(mqtt_input mqtt-device)
 
-add_executable(logic_controller
+add_executable(mqtt_logic_controller
 	devices/logic_controller/lua_host.cpp
 	devices/logic_controller/lua_timer.cpp
 	devices/logic_controller/main.cpp)
-target_link_libraries(logic_controller ${LUA_LIB} mqtt-device)
+target_link_libraries(mqtt_logic_controller ${LUA_LIB} mqtt-device)
 
 #add_custom_command(
 #    TARGET logic_controller POST_BUILD
@@ -83,7 +83,7 @@ target_link_libraries(logic_controller ${LUA_LIB} mqtt-device)
 #	COMMAND ln -sf ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
 #)
 
-install(TARGETS kmtronic_usb_relay hd0742m_dimmer rs485_2ch_relay keyboard logic_controller
+install(TARGETS mqtt_kmtronic_usb_relay mqtt_hd0742m_dimmer mqtt_rs485_2ch_relay mqtt_input mqtt_logic_controller
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib)
 
