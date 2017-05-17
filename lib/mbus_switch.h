@@ -20,7 +20,7 @@ public:
 	void write_register(uint16_t addr, uint16_t data);
 
 private:
-	void reconnect();
+	bool reconnect();
 
 private:
 	mbus_struct mbus_;

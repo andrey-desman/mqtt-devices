@@ -5,31 +5,25 @@
 
 int main(int argc, char* argv[])
 {
-	namespace po = boost::program_options;
-
 	std::string broker;
 	std::string client_id;
 	std::string server_addr;
 	uint16_t server_port;
 	uint16_t slave_addr;
 
+	try
 	{
-		options opt(client_id, broker);
+		options opt("hd0742m", argc, argv);
 
-		po::options_description mbus_opt("Modbus setings");
-		mbus_opt.add_options()
-			("server,s", po::value<std::string>(&server_addr)->default_value("127.0.0.1"), "Modbus server address")
-			("port,p", po::value<uint16_t>(&server_port)->default_value(502), "Modbus server port")
-			("slave,l", po::value<uint16_t>(&slave_addr)->required(), "HD0742M slave address")
-		;
-		opt.add(mbus_opt);
-
-		po::variables_map vm;
-
-		if (!opt.parse(argc, argv, vm))
-		{
-			return 1;
-		}
+		broker = opt.get("broker", options::scope_global, std::string("localhost"));
+		client_id = opt.get_name();
+		server_addr = opt.get<std::string>("modbus_server_addr", options::scope_domain, "localhost");
+		server_port = opt.get<int>("modbus_server_port", options::scope_domain, 502);
+		slave_addr = opt.get<int>("modbus_slave_addr", options::scope_device);
+	}
+	catch (const std::exception&)
+	{
+		return 1;
 	}
 
 	ev::default_loop loop;

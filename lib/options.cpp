@@ -1,45 +1,46 @@
 #include "options.h"
 
+#include <unistd.h>
+
 #include <iostream>
 
-namespace po = boost::program_options;
-
-options::options(std::string& client_id, std::string& broker)
+options::options(const std::string& domain, int argc, char* argv[])
+	: domain_(domain)
 {
-	po::options_description generic("Generic");
-	generic.add_options()
-		("client-id,c", po::value<std::string>(&client_id)->required(), "MQTT client id")
-		("broker,b", po::value<std::string>(&broker)->default_value("localhost:1883"), "MQTT broker address in form of host[:port]")
-		("help,h", "Print this message");
+	int opt;
+	std::string cfg = "/etc/mqtt-devices.lua.conf";
 
-	options_.add(generic);
+	while ((opt = getopt(argc, argv, "c:")) != -1)
+	{
+		switch (opt) {
+		case 'c':
+			cfg = optarg;
+			break;
+		default:
+			std::cerr << "Error: unrecognized option - " << (char)opt << std::endl;
+			usage();
+			throw std::invalid_argument("");
+		}
+	}
+
+	if (optind >= argc)
+	{
+		std::cerr << "Error: missing device name" << std::endl;
+		usage();
+		throw std::invalid_argument("");
+	}
+
+	name_ = argv[optind];
+	if (!L_.Load(cfg))
+	{
+		throw std::runtime_error("");
+	}
 }
 
-bool options::parse(int argc, char* argv[], po::variables_map& vm)
+void options::usage()
 {
-	try
-	{
-		po::parsed_options parsed = po::command_line_parser(argc, argv).options(options_).run();
-		po::store(parsed, vm);
-		po::notify(vm);
-	}
-	catch (const std::exception& e)
-	{
-		std::cout << "Error: " << e.what() << std::endl;
-		std::cout << options_ << std::endl;
-		return false;
-	}
-
-	if (vm.count("help"))
-	{
-		std::cout << options_ << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
-void options::help()
-{
-	std::cout << options_ << std::endl;
+	std::cout << "Usage:" << std::endl;
+	std::cout << "binary_name [-c config_file] device_name" << std::endl;
+	std::cout << "   config_file - path to lua config file, default " << "/etc/mqtt-devices.lua.conf" << std::endl;
+	std::cout << "   device_name - device name (aka mqtt client id) to serve" << std::endl;
 }

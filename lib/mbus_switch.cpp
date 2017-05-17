@@ -13,15 +13,15 @@ mbus_switch::~mbus_switch()
 	mbus_close(&mbus_);
 }
 
-void mbus_switch::reconnect()
+bool mbus_switch::reconnect()
 {
 	if (mbus_connected(&mbus_))
 	{
-		mbus_reconnect(&mbus_);
+		return mbus_reconnect(&mbus_) == 0;
 	}
 	else
 	{
-		mbus_connect(&mbus_, server_addr_.c_str(), server_port_, 0);
+		return mbus_connect(&mbus_, server_addr_.c_str(), server_port_, 0) == 0;
 	}
 }
 
@@ -31,12 +31,14 @@ uint16_t mbus_switch::read_register(uint16_t addr)
 
 	if (!mbus_connected(&mbus_))
 	{
-		reconnect();
+		if (!reconnect())
+			return 0;
 	}
 
 	if (mbus_cmd_read_holding_registers(&mbus_, slave_addr_, addr, 1, &reg) < 0)
 	{
-		reconnect();
+		if (!reconnect())
+			return 0;
 		mbus_cmd_read_holding_registers(&mbus_, slave_addr_, addr, 1, &reg);
 	}
 

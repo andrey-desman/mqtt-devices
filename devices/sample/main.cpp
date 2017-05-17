@@ -5,19 +5,19 @@
 
 int main(int argc, char* argv[])
 {
-	namespace po = boost::program_options;
-
 	std::string broker;
 	std::string client_id;
 
+	try
 	{
-		options opt(client_id, broker);
-		po::variables_map vm;
+		options opt("sample", argc, argv);
 
-		if (!opt.parse(argc, argv, vm))
-		{
-			return 1;
-		}
+		broker = opt.get("broker", options::scope_global, std::string("localhost"));
+		client_id = opt.get_name();
+	}
+	catch (const std::exception& e)
+	{
+		return 1;
 	}
 
 	ev::default_loop loop;

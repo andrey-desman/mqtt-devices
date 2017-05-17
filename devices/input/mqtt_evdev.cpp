@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <linux/input.h>
 
-mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async_client& client, const std::vector<int>& repeat, bool grab)
+mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async_client& client, std::array<int, 2> repeat, bool grab)
 	: loop_(loop)
 	, event_watcher_(loop)
 	, client_(client)
@@ -22,7 +22,7 @@ mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async
 
 	fcntl(fd_, F_SETFL, O_NONBLOCK);
 	grab && ioctl(fd_, EVIOCGRAB, 1);
-	repeat.size() && ioctl(fd_, EVIOCSREP, repeat.data());
+	ioctl(fd_, EVIOCSREP, repeat.data());
 
 	path_ = client_.get_client_id() + "/event/";
 

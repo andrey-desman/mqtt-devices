@@ -5,12 +5,12 @@
 
 #include <memory>
 #include <string>
-#include <vector>
+#include <array>
 
 class mqtt_evdev
 {
 public:
-	mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async_client& client, const std::vector<int>& repeat, bool grab);
+	mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async_client& client, std::array<int, 2> repeat, bool grab);
 	mqtt_evdev(const mqtt_evdev&) = delete;
 	mqtt_evdev& operator = (const mqtt_evdev&) = delete;
 

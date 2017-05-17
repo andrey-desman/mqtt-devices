@@ -6,44 +6,32 @@
 
 int main(int argc, char* argv[])
 {
-	namespace po = boost::program_options;
-
 	std::string broker;
 	std::string client_id;
-	std::string event_path;
-	std::vector<int> repeat;
-	bool grab = false;
+	std::string evdev_path;
+	std::array<int, 2> repeat;
+	bool grab;
 
-	options opt(client_id, broker);
-
+	try
 	{
-		po::options_description ev_opt("Event");
-		ev_opt.add_options()
-			("evdev,e", po::value<std::string>(&event_path)->required(), "Path to input device event node")
-			("grab,g", po::bool_switch(&grab)->default_value(false), "Grab device for exclusive access")
-			("repeat,r", po::value<std::vector<int> >(&repeat)->multitoken(), "Delay/repeat interval in milliseconds, e.g. -r 1200 600")
-		;
-		opt.add(ev_opt);
+		options opt("hd0742m", argc, argv);
 
-		po::variables_map vm;
-
-		if (!opt.parse(argc, argv, vm))
-		{
-			return 1;
-		}
-
-		if (repeat.size() != 0 && repeat.size() != 2)
-		{
-			std::cout << "Error: expected 2 values for --repeat option, e.g. -r 1000 500" << std::endl;
-			opt.help();
-			return 1;
-		}
+		broker = opt.get("broker", options::scope_global, std::string("localhost"));
+		client_id = opt.get_name();
+		evdev_path = opt.get<std::string>("device", options::scope_device);
+		repeat[0] = opt.get<int>("repeat_delay", options::scope_domain, 0);
+		repeat[1] = opt.get<int>("repeat_rate", options::scope_domain, 0);
+		grab = opt.get<bool>("grab", options::scope_domain, false);
+	}
+	catch (const std::exception&)
+	{
+		return 1;
 	}
 
 	ev::default_loop loop;
 	mqtt_app app(loop, broker, client_id);
-	sleep(1);
-	mqtt_evdev evdev(event_path, loop, app.client(), repeat, grab);
+	// sleep(1);
+	mqtt_evdev evdev(evdev_path, loop, app.client(), repeat, grab);
 
 	app.run();
 

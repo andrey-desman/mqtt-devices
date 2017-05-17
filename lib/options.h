@@ -1,23 +1,66 @@
 #pragma once
 
-#include <boost/program_options.hpp>
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+
+#include "selene.h"
+
+#include <stdexcept>
 
 class options
 {
 public:
-
-	options(std::string& client_id, std::string& broker);
-
-	void add(const boost::program_options::options_description& opt)
+	enum option_scope
 	{
-		options_.add(opt);
+		scope_device,
+		scope_domain,
+		scope_global
+	};
+
+	options(const std::string& domain, int argc, char* argv[]);
+
+	std::string get_name() const
+	{
+		return name_;
 	}
 
-	bool parse(int argc, char* argv[], boost::program_options::variables_map& vm);
-	void help();
+	template<typename T>
+	T get(const std::string& opt, option_scope scope)
+	{
+		sel::Selector s = L_[domain_.c_str()][name_.c_str()][opt.c_str()];
+
+		if (!s && scope >= scope_domain)
+			s = L_[domain_.c_str()][opt.c_str()];
+		if (!s && scope >= scope_global)
+			s = L_[opt.c_str()];
+		if (!s)
+		{
+			std::cerr << "Error: missing required option - " << opt << " for device " << name_ << std::endl;
+			throw std::runtime_error("");
+		}
+		return s;
+	}
+
+	template<typename T>
+	T get(const std::string& opt, option_scope scope, const T& default_value)
+	{
+		sel::Selector s = L_[domain_.c_str()][name_.c_str()][opt.c_str()];
+
+		if (!s && scope >= scope_domain)
+			s = L_[domain_.c_str()][opt.c_str()];
+		if (!s && scope >= scope_global)
+			s = L_[opt.c_str()];
+		if (!s)
+			return default_value;
+		return s;
+	}
 
 private:
-	boost::program_options::options_description options_;
+	void usage();
 
+	std::string domain_;
+	std::string name_;
+	sel::State L_;
 };
 
