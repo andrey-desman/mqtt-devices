@@ -1,4 +1,5 @@
 #include "mqtt_evdev.h"
+#include "util.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -38,15 +39,10 @@ void mqtt_evdev::process_event(ev::io& io, int revents)
 	{
 		if (ev.type == EV_KEY)
 		{
-			std::string payload = boost::lexical_cast<std::string>(ev.value);
-
-			try
-			{
+			noexception([&ev, this](){
+				std::string payload = boost::lexical_cast<std::string>(ev.value);
 				client_.publish(path_ + boost::lexical_cast<std::string>(ev.code), payload.c_str(), payload.size(), 0, false);
-			}
-			catch (...)
-			{
-			}
+			});
 		}
 	}
 }

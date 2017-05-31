@@ -7,10 +7,10 @@
 
 struct converter
 {
-	std::vector<std::string>& args;
+	const std::vector<std::string>& args;
 	size_t offset;
 
-	converter(std::vector<std::string>& v, size_t offset)
+	converter(const std::vector<std::string>& v, size_t offset)
 	: args(v), offset(offset) { }
 
 	template<typename T>

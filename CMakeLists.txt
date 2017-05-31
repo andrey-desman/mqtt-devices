@@ -71,11 +71,11 @@ target_link_libraries(mqtt_rs485_2ch_relay mqtt-device)
 add_executable(mqtt_input devices/input/mqtt_evdev.cpp devices/input/main.cpp)
 target_link_libraries(mqtt_input mqtt-device)
 
-add_executable(mqtt_logic_controller
-	devices/logic_controller/lua_host.cpp
-	devices/logic_controller/lua_timer.cpp
-	devices/logic_controller/main.cpp)
-target_link_libraries(mqtt_logic_controller ${LUA_LIB} mqtt-device)
+add_executable(mqtt_controller
+	devices/controller/lua_host.cpp
+	devices/controller/lua_timer.cpp
+	devices/controller/main.cpp)
+target_link_libraries(mqtt_controller ${LUA_LIB} mqtt-device)
 
 #add_custom_command(
 #    TARGET logic_controller POST_BUILD
@@ -83,7 +83,7 @@ target_link_libraries(mqtt_logic_controller ${LUA_LIB} mqtt-device)
 #	COMMAND ln -sf ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
 #)
 
-install(TARGETS mqtt_kmtronic_usb_relay mqtt_hd0742m_dimmer mqtt_rs485_2ch_relay mqtt_input mqtt_logic_controller
+install(TARGETS mqtt_kmtronic_usb_relay mqtt_hd0742m_dimmer mqtt_rs485_2ch_relay mqtt_input mqtt_controller
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib)
 

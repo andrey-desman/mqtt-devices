@@ -5,27 +5,21 @@
 
 int main(int argc, char* argv[])
 {
-	namespace po = boost::program_options;
-
 	std::string broker;
 	std::string client_id;
 	std::string dev_path;
 
+	try
 	{
-		options opt(client_id, broker);
+		options opt("kmtronic", argc, argv);
 
-		po::options_description ev_opt("Relay");
-		ev_opt.add_options()
-			("device-path,d", po::value<std::string>(&dev_path)->required(), "Path to KMTronic USB relay device node")
-		;
-		opt.add(ev_opt);
-
-		po::variables_map vm;
-
-		if (!opt.parse(argc, argv, vm))
-		{
-			return 1;
-		}
+		broker = opt.get("broker", options::scope_global, std::string("localhost"));
+		client_id = opt.get_name();
+		dev_path = opt.get<std::string>("device_path", options::scope_device);
+	}
+	catch (const std::exception&)
+	{
+		return 1;
 	}
 
 	ev::default_loop loop;
