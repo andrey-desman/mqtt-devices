@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		options opt("hd0742m", argc, argv);
+		options opt("input", argc, argv);
 
 		broker = opt.get("broker", options::scope_global, std::string("localhost"));
 		client_id = opt.get_name();
@@ -30,7 +30,6 @@ int main(int argc, char* argv[])
 
 	ev::default_loop loop;
 	mqtt_app app(loop, broker, client_id);
-	// sleep(1);
 	mqtt_evdev evdev(evdev_path, loop, app.client(), repeat, grab);
 
 	app.run();

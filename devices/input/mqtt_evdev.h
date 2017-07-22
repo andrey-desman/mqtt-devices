@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <array>
+#include <unordered_map>
 
 class mqtt_evdev
 {
@@ -15,15 +16,27 @@ public:
 	mqtt_evdev& operator = (const mqtt_evdev&) = delete;
 
 private:
+	enum
+	{
+		KEY_RELEASE,
+		KEY_PRESS,
+		KEY_REPEAT
+	};
+
 	void process_event(ev::io& io, int revents);
+	void process_repeat(ev::timer& timer, int revents);
+	void start_repeating(int code);
+	void stop_repeating(int code);
 
 private:
+	ev::loop_ref& loop_;
+	mqtt::async_client& client_;
+	std::array<int, 2> repeat_;
 
 	int fd_;
 	std::shared_ptr<void> fd_guard_;
 	std::string path_;
-
-	ev::loop_ref& loop_;
 	ev::io event_watcher_;
-	mqtt::async_client& client_;
+	std::unordered_map<int, ev::timer> repeat_timers_;
+	std::unordered_map<ev::timer*, int> repeat_codes_;
 };

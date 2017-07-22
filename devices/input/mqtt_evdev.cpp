@@ -6,11 +6,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <linux/input.h>
+#include <iostream>
+
 
 mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async_client& client, std::array<int, 2> repeat, bool grab)
 	: loop_(loop)
-	, event_watcher_(loop)
 	, client_(client)
+	, repeat_(repeat)
+	, path_(client_.get_client_id() + "/event/")
+	, event_watcher_(loop)
 {
 	fd_ = open(event.c_str(), O_RDONLY);
 
@@ -23,9 +27,12 @@ mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async
 
 	fcntl(fd_, F_SETFL, O_NONBLOCK);
 	grab && ioctl(fd_, EVIOCGRAB, 1);
-	ioctl(fd_, EVIOCSREP, repeat.data());
 
-	path_ = client_.get_client_id() + "/event/";
+	if (repeat_[0] <= 0 || repeat_[1] <= 0)
+	{
+		repeat_[0] = 0;
+		repeat_[1] = 0;
+	}
 
 	event_watcher_.set<mqtt_evdev, &mqtt_evdev::process_event>(this);
 	event_watcher_.start(fd_, ev::READ);
@@ -34,16 +41,59 @@ mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async
 void mqtt_evdev::process_event(ev::io& io, int revents)
 {
 	input_event ev;
+	int r;
 
-	while (read(fd_, &ev, sizeof(ev)) == sizeof(ev))
+	while ((r = read(fd_, &ev, sizeof(ev))) == sizeof(ev))
 	{
-		if (ev.type == EV_KEY)
-		{
-			noexception([&ev, this](){
-				std::string payload = boost::lexical_cast<std::string>(ev.value);
-				client_.publish(path_ + boost::lexical_cast<std::string>(ev.code), payload.c_str(), payload.size(), 0, false);
-			});
-		}
+		if (ev.type != EV_KEY || ev.value == KEY_REPEAT)
+			continue;
+
+		noexception([&ev, this](){
+			std::string payload = boost::lexical_cast<std::string>(ev.value);
+			client_.publish(path_ + boost::lexical_cast<std::string>(ev.code), payload.c_str(), payload.size(), 0, false);
+		});
+
+		if (repeat_[0] == 0)
+			continue;
+
+		if (ev.value == KEY_PRESS)
+			start_repeating(ev.code);
+		else
+			stop_repeating(ev.code);
 	}
+
+	if (r == -1 && errno != EWOULDBLOCK)
+		loop_.break_loop();
 }
+
+void mqtt_evdev::process_repeat(ev::timer& timer, int revents)
+{
+	auto it = repeat_codes_.find(&timer);
+	if (it == repeat_codes_.end())
+		return;
+
+	noexception([this, it](){
+		std::string payload = "2";
+		client_.publish(path_ + boost::lexical_cast<std::string>(it->second), payload.c_str(), payload.size(), 0, false);
+	});
+}
+
+void mqtt_evdev::start_repeating(int code)
+{
+	auto& t = repeat_timers_[code];
+	repeat_codes_[&t] = code;
+	t.set(loop_);
+	t.set<mqtt_evdev, &mqtt_evdev::process_repeat>(this);
+	t.start(repeat_[0] / 1000.0, repeat_[1] / 1000.0);
+}
+
+void mqtt_evdev::stop_repeating(int code)
+{
+	auto it = repeat_timers_.find(code);
+	if (it == repeat_timers_.end())
+		return;
+	repeat_codes_.erase(&it->second);
+	repeat_timers_.erase(it);
+}
+
 
