@@ -21,5 +21,5 @@ function SwitchController(t)
 	assert(t.key, "SwitchController: Missing key")
 
 	local c = CSwitchController.new(switches[switch_name])
-	register_event_handler(keyboard, key, c)
+	register_event_handler(t.keyboard, t.key, c)
 end
