@@ -68,20 +68,17 @@ void mqtt_evdev::process_event(ev::io& io, int revents)
 
 void mqtt_evdev::process_repeat(ev::timer& timer, int revents)
 {
-	auto it = repeat_codes_.find(&timer);
-	if (it == repeat_codes_.end())
-		return;
-
-	noexception([this, it](){
+	int code = static_cast<key_repeat_timer&>(timer).code;
+	noexception([this, code]() {
 		std::string payload = "2";
-		client_.publish(path_ + boost::lexical_cast<std::string>(it->second), payload.c_str(), payload.size(), 0, false);
+		client_.publish(path_ + boost::lexical_cast<std::string>(code), payload.c_str(), payload.size(), 0, false);
 	});
 }
 
 void mqtt_evdev::start_repeating(int code)
 {
 	auto& t = repeat_timers_[code];
-	repeat_codes_[&t] = code;
+	t.code = code;
 	t.set(loop_);
 	t.set<mqtt_evdev, &mqtt_evdev::process_repeat>(this);
 	t.start(repeat_[0] / 1000.0, repeat_[1] / 1000.0);
@@ -89,11 +86,7 @@ void mqtt_evdev::start_repeating(int code)
 
 void mqtt_evdev::stop_repeating(int code)
 {
-	auto it = repeat_timers_.find(code);
-	if (it == repeat_timers_.end())
-		return;
-	repeat_codes_.erase(&it->second);
-	repeat_timers_.erase(it);
+	repeat_timers_.erase(code);
 }
 
 

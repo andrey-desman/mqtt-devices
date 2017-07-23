@@ -23,6 +23,11 @@ private:
 		KEY_REPEAT
 	};
 
+	struct key_repeat_timer: public ev::timer
+	{
+		int code;
+	};
+
 	void process_event(ev::io& io, int revents);
 	void process_repeat(ev::timer& timer, int revents);
 	void start_repeating(int code);
@@ -37,6 +42,5 @@ private:
 	std::shared_ptr<void> fd_guard_;
 	std::string path_;
 	ev::io event_watcher_;
-	std::unordered_map<int, ev::timer> repeat_timers_;
-	std::unordered_map<ev::timer*, int> repeat_codes_;
+	std::unordered_map<int, key_repeat_timer> repeat_timers_;
 };
