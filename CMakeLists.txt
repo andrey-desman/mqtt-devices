@@ -44,7 +44,7 @@ include_directories(devices)
 SET( CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined" )
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_add_library(MBUS mbus mbus.h)
