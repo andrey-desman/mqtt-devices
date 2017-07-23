@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
 		broker = opt.get("broker", options::scope_global, std::string("localhost"));
 		client_id = opt.get_name();
-		dev_path = opt.get<std::string>("device_path", options::scope_device);
+		dev_path = opt.get<std::string>("device", options::scope_device);
 	}
 	catch (const std::exception&)
 	{
