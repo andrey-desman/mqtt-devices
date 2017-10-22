@@ -11,6 +11,7 @@ int main(int argc, char* argv[])
 	std::string evdev_path;
 	std::array<int, 2> repeat;
 	bool grab;
+	bool map_abs;
 
 	try
 	{
@@ -21,6 +22,7 @@ int main(int argc, char* argv[])
 		evdev_path = opt.get<std::string>("device", options::scope_device);
 		repeat[0] = opt.get<int>("repeat_delay", options::scope_domain, 0);
 		repeat[1] = opt.get<int>("repeat_rate", options::scope_domain, 0);
+		map_abs = opt.get<bool>("map_absolute_axis", options::scope_domain, false);
 		grab = opt.get<bool>("grab", options::scope_domain, false);
 	}
 	catch (const std::exception&)
@@ -30,7 +32,7 @@ int main(int argc, char* argv[])
 
 	ev::default_loop loop;
 	mqtt_app app(loop, broker, client_id);
-	mqtt_evdev evdev(evdev_path, loop, app.client(), repeat, grab);
+	mqtt_evdev evdev(evdev_path, loop, app.client(), repeat, grab, map_abs);
 
 	app.run();
 

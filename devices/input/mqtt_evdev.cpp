@@ -2,14 +2,13 @@
 #include "util.h"
 
 #include <boost/lexical_cast.hpp>
+#include <cstdio>
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <linux/input.h>
-#include <iostream>
 
 
-mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async_client& client, std::array<int, 2> repeat, bool grab)
+mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async_client& client, std::array<int, 2> repeat, bool grab, bool map_abs)
 	: loop_(loop)
 	, client_(client)
 	, repeat_(repeat)
@@ -34,6 +33,21 @@ mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async
 		repeat_[1] = 0;
 	}
 
+	input_absinfo absinfo;
+	for (int i = 0; map_abs && i < AXIS_COUNT; ++i)
+	{
+		abs_axis_[i].remapped = ioctl(fd_, EVIOCGABS(i), &absinfo) != -1;
+		if (abs_axis_[i].remapped)
+		{
+			abs_axis_[i].low.code = KEY_MAX + i * 2;
+			abs_axis_[i].high.code = abs_axis_[i].low.code + 1;
+
+			int neutral = (absinfo.minimum + absinfo.maximum) / 2;
+			abs_axis_[i].low.threshold = (absinfo.minimum + neutral) / 2;
+			abs_axis_[i].high.threshold = (absinfo.maximum + neutral) / 2;
+		}
+	}
+
 	event_watcher_.set<mqtt_evdev, &mqtt_evdev::process_event>(this);
 	event_watcher_.start(fd_, ev::READ);
 }
@@ -45,25 +59,61 @@ void mqtt_evdev::process_event(ev::io& io, int revents)
 
 	while ((r = read(fd_, &ev, sizeof(ev))) == sizeof(ev))
 	{
-		if (ev.type != EV_KEY || ev.value == KEY_REPEAT)
-			continue;
-
-		noexception([&ev, this](){
-			std::string payload = boost::lexical_cast<std::string>(ev.value);
-			client_.publish(path_ + boost::lexical_cast<std::string>(ev.code), payload.c_str(), payload.size(), 0, false);
-		});
-
-		if (repeat_[0] == 0)
-			continue;
-
-		if (ev.value == KEY_PRESS)
-			start_repeating(ev.code);
-		else
-			stop_repeating(ev.code);
+		if (ev.type == EV_ABS)
+			process_abs(ev.code, ev.value);
+		else if (ev.type == EV_KEY && ev.value != KEY_REPEAT)
+			process_key(ev.code, KeyEvent(ev.value));
 	}
 
 	if (r == -1 && errno != EWOULDBLOCK)
 		loop_.break_loop();
+}
+
+void mqtt_evdev::process_key(int code, KeyEvent event)
+{
+	noexception([this, code, event](){
+		std::string payload = boost::lexical_cast<std::string>(event);
+		client_.publish(path_ + boost::lexical_cast<std::string>(code), payload.c_str(), payload.size(), 0, false);
+	});
+
+	if (repeat_[0] == 0)
+		return;
+
+	if (event == KEY_PRESS)
+		start_repeating(code);
+	else
+		stop_repeating(code);
+}
+
+void mqtt_evdev::process_abs(int axis, int value)
+{
+	if (axis >= AXIS_COUNT || !abs_axis_[axis].remapped)
+		return;
+
+	if (value < abs_axis_[axis].low.threshold)
+	{
+		press_key(abs_axis_[axis].high, KEY_RELEASE);
+		press_key(abs_axis_[axis].low, KEY_PRESS);
+	}
+	else if (value > abs_axis_[axis].high.threshold)
+	{
+		press_key(abs_axis_[axis].low, KEY_RELEASE);
+		press_key(abs_axis_[axis].high, KEY_PRESS);
+	}
+	else
+	{
+		press_key(abs_axis_[axis].low, KEY_RELEASE);
+		press_key(abs_axis_[axis].high, KEY_RELEASE);
+	}
+}
+
+void mqtt_evdev::press_key(abs_key& key, KeyEvent event)
+{
+	if (event == KEY_REPEAT || key.pressed == (event == KEY_PRESS))
+		return;
+
+	key.pressed = event == KEY_PRESS;
+	process_key(key.code, event);
 }
 
 void mqtt_evdev::process_repeat(ev::timer& timer, int revents)
