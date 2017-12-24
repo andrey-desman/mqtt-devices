@@ -1,10 +1,12 @@
 #include "mqtt_app.h"
+#include "log.h"
 
 namespace
 {
 
 void sighandler(ev::sig& sig, int revents)
 {
+	LOG(info, "received signal '%s'", strsignal(sig.signum));
 	sig.loop.break_loop();
 }
 
@@ -27,6 +29,7 @@ mqtt_app::mqtt_app(ev::loop_ref& loop, const std::string& uri, const std::string
 
 void mqtt_app::run()
 {
+	LOG(debug, "running...");
 	connection_.connect();
 	loop_.run();
 }

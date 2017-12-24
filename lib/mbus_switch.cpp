@@ -1,60 +1,43 @@
 #include "mbus_switch.h"
+#include "util.h"
 
-mbus_switch::mbus_switch(const std::string& server_addr, uint16_t port, mbus_uword slave_addr)
-	: server_addr_(server_addr)
-	, server_port_(port)
-	, slave_addr_(slave_addr)
+#include <stdexcept>
+
+mbus_switch::mbus_switch(const std::string& server_addr, uint16_t port, uint16_t slave_addr)
+	: modbus_(modbus_new_tcp(server_addr.c_str(), port))
 {
-	mbus_init(&mbus_);
+	modbus_error_recovery_mode mode = modbus_error_recovery_mode(MODBUS_ERROR_RECOVERY_PROTOCOL);
+
+	check<std::runtime_error>(modbus_, "Failed to create modbus context");
+	modbus_set_debug(modbus_, 1);
+	check<std::runtime_error>(modbus_set_error_recovery(modbus_, mode) != -1, "Failed to set recovery mode");
+	check<std::runtime_error>(modbus_set_slave(modbus_, slave_addr) != -1, "Failed to set slave address");
 }
 
 mbus_switch::~mbus_switch()
 {
-	mbus_close(&mbus_);
-}
-
-bool mbus_switch::reconnect()
-{
-	if (mbus_connected(&mbus_))
-	{
-		return mbus_reconnect(&mbus_) == 0;
-	}
-	else
-	{
-		return mbus_connect(&mbus_, server_addr_.c_str(), server_port_, 0) == 0;
-	}
+	modbus_close(modbus_);
+	modbus_free(modbus_);
 }
 
 uint16_t mbus_switch::read_register(uint16_t addr)
 {
-	mbus_uword reg;
-
-	if (!mbus_connected(&mbus_))
+	uint16_t out = 0;
+	if (modbus_read_registers(modbus_, addr, 1, &out) == -1)
 	{
-		if (!reconnect())
-			return 0;
+		modbus_close(modbus_);
+		modbus_connect(modbus_);
+		check<std::runtime_error>(modbus_read_registers(modbus_, addr, 1, &out) != -1, "Failed to read register");
 	}
-
-	if (mbus_cmd_read_holding_registers(&mbus_, slave_addr_, addr, 1, &reg) < 0)
-	{
-		if (!reconnect())
-			return 0;
-		mbus_cmd_read_holding_registers(&mbus_, slave_addr_, addr, 1, &reg);
-	}
-
-	return reg;
+	return out;
 }
 
 void mbus_switch::write_register(uint16_t addr, uint16_t data)
 {
-	if (!mbus_connected(&mbus_))
+	if (modbus_write_register(modbus_, addr, data) == -1)
 	{
-		reconnect();
-	}
-
-	if (mbus_cmd_preset_single_register(&mbus_, slave_addr_, addr, data) < 0)
-	{
-		reconnect();
-		mbus_cmd_preset_single_register(&mbus_, slave_addr_, addr, data);
+		modbus_close(modbus_);
+		modbus_connect(modbus_);
+		check<std::runtime_error>(modbus_write_register(modbus_, addr, data) != -1, "Failed to write register");
 	}
 }

@@ -47,10 +47,10 @@ SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
 
-find_add_library(MBUS mbus mbus.h)
+find_add_library(MODBUS modbus modbus/modbus.h)
 find_add_library(PAHO_C_ASYNC paho-mqtt3a MQTTAsync.h)
 find_add_library(EV ev ev++.h)
-find_add_library(PAHO_CPP mqttpp mqtt/async_client.h)
+find_add_library(PAHO_CPP paho-mqttpp3 mqtt/async_client.h)
 find_add_library(LUA lua lua.h)
 find_add_library(LUA lua5.3 lua5.3/lua.h)
 

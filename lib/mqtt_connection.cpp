@@ -1,7 +1,6 @@
 #include "mqtt_connection.h"
 #include "util.h"
-
-#include <iostream>
+#include "log.h"
 
 mqtt_connection::mqtt_connection(mqtt::async_client& client, ev::loop_ref& loop, call_queue& caller)
 	: client_(client)
@@ -14,14 +13,15 @@ mqtt_connection::mqtt_connection(mqtt::async_client& client, ev::loop_ref& loop,
 mqtt_connection::~mqtt_connection()
 {
 	noexception([this]() {
-		client_.disconnect()->wait_for_completion(); });
+		client_.disconnect()->wait(); });
 }
 
 void mqtt_connection::connect()
 {
 	try
 	{
-		client_.connect()->wait_for_completion();
+		client_.connect()->wait();
+		LOG(info, "connected");
 		if (on_connected_)
 		{
 			caller_.post(on_connected_);
@@ -31,6 +31,7 @@ void mqtt_connection::connect()
 	}
 	catch (const mqtt::exception& e)
 	{
+		LOG(error, "connection failed, retrying in %d seconds", 5);
 		if (!connect_timer_)
 		{
 			connect_timer_.reset(new ev::timer(loop_));
@@ -48,6 +49,7 @@ void mqtt_connection::connect_timer(ev::timer& t, int revents)
 // mqtt::callback
 void mqtt_connection::connection_lost(const std::string& cause)
 {
+	LOG(error, "disconnected");
 	if (on_disconnected_)
 	{
 		caller_.post(on_disconnected_);
@@ -55,15 +57,12 @@ void mqtt_connection::connection_lost(const std::string& cause)
 	caller_.post(std::move(std::bind(&mqtt_connection::connect, this)));
 }
 
-void mqtt_connection::message_arrived(const std::string& topic, mqtt::message_ptr msg)
+void mqtt_connection::message_arrived(mqtt::const_message_ptr msg)
 {
+	LOG(debug, "got message '%s' on '%s'", msg->get_payload().c_str(), msg->get_topic().c_str());
 	if (on_message_)
 	{
-		caller_.post(std::bind(on_message_, topic, msg));
+		caller_.post(std::bind(on_message_, msg));
 	}
-}
-
-void mqtt_connection::delivery_complete(mqtt::idelivery_token_ptr tok)
-{
 }
 

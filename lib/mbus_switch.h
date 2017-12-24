@@ -2,7 +2,7 @@
 
 #include "iswitch.h"
 
-#include <mbus.h>
+#include <modbus/modbus.h>
 
 #include <string>
 #include <inttypes.h>
@@ -20,12 +20,6 @@ public:
 	void write_register(uint16_t addr, uint16_t data);
 
 private:
-	bool reconnect();
-
-private:
-	mbus_struct mbus_;
-	std::string server_addr_;
-	uint16_t server_port_;
-	uint16_t slave_addr_;
+	modbus_t* modbus_;
 };
 

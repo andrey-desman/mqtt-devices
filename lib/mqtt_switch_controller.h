@@ -16,7 +16,7 @@ public:
 private:
 	void subscribe();
 	size_t process_command(const std::string& command, size_t value);
-	void handle_command(const std::string& topic, mqtt::message_ptr msg);
+	void handle_command(mqtt::const_message_ptr msg);
 
 	mqtt_connection& connection_;
 	iswitch& switch_;

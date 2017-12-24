@@ -37,7 +37,7 @@ struct converter
 };
 
 template<typename T>
-void noexception(const T& f)
+inline void noexception(const T& f)
 {
 	try
 	{
@@ -45,6 +45,14 @@ void noexception(const T& f)
 	}
 	catch (...)
 	{
+		throw;
 	}
+}
+
+template<typename E>
+inline void check(bool condition, const char* message)
+{
+	if (!condition)
+		throw E(message);
 }
 

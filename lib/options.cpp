@@ -1,4 +1,5 @@
 #include "options.h"
+#include "log.h"
 
 #include <unistd.h>
 
@@ -7,6 +8,9 @@
 options::options(const std::string& domain, int argc, char* argv[])
 	: domain_(domain)
 {
+	if (!logger::APP_NAME)
+		logger::APP_NAME = argv[0];
+
 	int opt;
 	std::string cfg = "/etc/mqtt-devices.lua.conf";
 
@@ -19,7 +23,7 @@ options::options(const std::string& domain, int argc, char* argv[])
 		default:
 			std::cerr << "Error: unrecognized option - " << (char)opt << std::endl;
 			usage();
-			throw std::invalid_argument("");
+			throw std::invalid_argument("Invalid option");
 		}
 	}
 
@@ -31,9 +35,16 @@ options::options(const std::string& domain, int argc, char* argv[])
 	}
 
 	name_ = argv[optind];
+	logger::INSTANCE_NAME = argv[optind];
+
+	LOG(info, "client id '%s'", name_.c_str());
+	LOG(info, "domain '%s'", domain.c_str());
+	LOG(info, "config '%s'", cfg.c_str());
 	if (!L_.Load(cfg))
 	{
-		throw std::runtime_error("");
+		LOG(error, "failed to load config from '%s'", cfg.c_str());
+		std::cerr << "Failed to load config file" << std::endl;
+		throw std::runtime_error("Failed to load config file");
 	}
 }
 

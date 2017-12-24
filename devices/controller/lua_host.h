@@ -20,7 +20,7 @@ public:
 
 private:
 	void subscribe();
-	void handle_event(const std::string& topic, mqtt::message_ptr msg);
+	void handle_event(mqtt::const_message_ptr msg);
 
 	void send_switch_command(std::string s, int channel, std::string command);
 

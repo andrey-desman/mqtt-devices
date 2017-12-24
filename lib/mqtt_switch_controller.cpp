@@ -32,7 +32,7 @@ mqtt_switch_controller::mqtt_switch_controller(iswitch& s, mqtt_connection& c)
 {
 	using namespace std::placeholders;
 	c.set_on_connected(std::bind(&mqtt_switch_controller::subscribe, this));
-	c.set_on_message(std::bind(&mqtt_switch_controller::handle_command, this, _1, _2));
+	c.set_on_message(std::bind(&mqtt_switch_controller::handle_command, this, _1));
 }
 
 mqtt_switch_controller::~mqtt_switch_controller()
@@ -41,13 +41,13 @@ mqtt_switch_controller::~mqtt_switch_controller()
 	connection_.set_on_message(mqtt_connection::on_message_handler());
 
 	noexception([this]
-		{ connection_.client().unsubscribe(connection_.client().get_client_id() + "/switch/+/command")->wait_for_completion(); });
+		{ connection_.client().unsubscribe(connection_.client().get_client_id() + "/switch/+/command")->wait(); });
 }
 
 void mqtt_switch_controller::subscribe()
 {
 	noexception([this]
-		{ connection_.client().subscribe(connection_.client().get_client_id() + "/switch/+/command", 0)->wait_for_completion(); });
+		{ connection_.client().subscribe(connection_.client().get_client_id() + "/switch/+/command", 0)->wait(); });
 }
 
 size_t mqtt_switch_controller::process_command(const std::string& command, size_t value)
@@ -67,12 +67,12 @@ size_t mqtt_switch_controller::process_command(const std::string& command, size_
 	else return boost::lexical_cast<size_t>(cmd);
 }
 
-void mqtt_switch_controller::handle_command(const std::string& topic, mqtt::message_ptr msg)
+void mqtt_switch_controller::handle_command(mqtt::const_message_ptr msg)
 {
 	try
 	{
 		std::vector<std::string> parts;
-		boost::split(parts, topic, [](char c) { return c == '/'; });
+		boost::split(parts, msg->get_topic(), [](char c) { return c == '/'; });
 
 		size_t channel = boost::lexical_cast<size_t>(parts.at(2));
 
@@ -86,7 +86,7 @@ void mqtt_switch_controller::handle_command(const std::string& topic, mqtt::mess
 
 		parts[3] = "state";
 		std::string state = boost::lexical_cast<std::string>(switch_.get_channel_state(channel));
-		connection_.client().publish(boost::join(parts, "/"), state.c_str(), state.size(), 0, true)->wait_for_completion();
+		connection_.client().publish(boost::join(parts, "/"), state.c_str(), state.size(), 0, true)->wait();
 
 	}
 	catch (const boost::bad_lexical_cast& e)

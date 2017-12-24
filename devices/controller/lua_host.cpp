@@ -10,7 +10,7 @@ lua_host::lua_host(mqtt_connection& conn, ev::loop_ref& loop, const std::string&
 {
 	using namespace std::placeholders;
 	conn.set_on_connected(std::bind(&lua_host::subscribe, this));
-	conn.set_on_message(std::bind(&lua_host::handle_event, this, _1, _2));
+	conn.set_on_message(std::bind(&lua_host::handle_event, this, _1));
 
 	LuaTimer::set_loop(&loop);
 
@@ -32,13 +32,13 @@ lua_host::lua_host(mqtt_connection& conn, ev::loop_ref& loop, const std::string&
 
 lua_host::~lua_host()
 {
-	connection_.set_on_connected(std::function<void ()>());
-	connection_.set_on_message(std::function<void (const std::string&, mqtt::message_ptr)>());
+	connection_.set_on_connected(mqtt_connection::on_connected_handler());
+	connection_.set_on_message(mqtt_connection::on_message_handler());
 
 	noexception([this]
 	{
-		connection_.client().unsubscribe("+/switch/+/state")->wait_for_completion();
-		connection_.client().unsubscribe("+/event/+")->wait_for_completion();
+		connection_.client().unsubscribe("+/switch/+/state")->wait();
+		connection_.client().unsubscribe("+/event/+")->wait();
 	});
 }
 
@@ -52,10 +52,10 @@ void lua_host::subscribe()
 
 }
 
-void lua_host::handle_event(const std::string& topic, mqtt::message_ptr msg)
+void lua_host::handle_event(mqtt::const_message_ptr msg)
 {
 	std::vector<std::string> parts;
-	boost::split(parts, topic, [](char c) { return c == '/'; });
+	boost::split(parts, msg->get_topic(), [](char c) { return c == '/'; });
 	const char* function;
 
 	if (parts.at(1) == "switch")
@@ -79,7 +79,7 @@ void lua_host::send_switch_command(std::string s, int channel, std::string comma
 	noexception([&]()
 	{
 		connection_.client().publish(s + "/switch/" + boost::lexical_cast<std::string>(channel) + "/command",
-			command.c_str(), command.size(), 0, false)->wait_for_completion();
+			command.c_str(), command.size(), 0, false)->wait();
 	});
 }
 
