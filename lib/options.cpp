@@ -35,7 +35,8 @@ options::options(const std::string& domain, int argc, char* argv[])
 	}
 
 	name_ = argv[optind];
-	logger::INSTANCE_NAME = argv[optind];
+
+	logger::init(argv[0], argv[optind]);
 
 	LOG(info, "client id '%s'", name_.c_str());
 	LOG(info, "domain '%s'", domain.c_str());
