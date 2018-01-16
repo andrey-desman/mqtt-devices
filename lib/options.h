@@ -1,5 +1,7 @@
 #pragma once
 
+#include "log.h"
+
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
@@ -7,6 +9,7 @@
 #include "selene.h"
 
 #include <stdexcept>
+#include <boost/lexical_cast.hpp>
 
 class options
 {
@@ -32,12 +35,18 @@ public:
 
 		if (!s && scope >= scope_domain)
 			s = L_[domain_.c_str()][opt.c_str()];
+		if (s)
 		if (!s && scope >= scope_global)
 			s = L_[opt.c_str()];
 		if (!s)
 		{
-			std::cerr << "Error: missing required option - " << opt << " for device " << name_ << std::endl;
-			throw std::runtime_error("");
+			LOG(info, "missing required option '%s'", opt.c_str());
+			throw std::runtime_error("missing required option");
+		}
+		else
+		{
+			std::string val = s;
+			LOG(info, "'%s' = '%s', scope %s", opt.c_str(), val.c_str(), "global");
 		}
 		return s;
 	}

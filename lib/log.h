@@ -52,5 +52,5 @@ namespace logger
 
 #define FILE_NAME ({const char* fn = logger::file_name(__FILE__); fn;})
 
-#define LOG(l, format, ...) logger::out("[%s] [%s][%s] %s:%d: %s: " format "\n", logger::level_to_str(logger::l), logger::APP_NAME, logger::INSTANCE_NAME, FILE_NAME, __LINE__, __func__, ##__VA_ARGS__)
+#define LOG(l, format, ...) logger::out("[%s] [%s/%s] %s:%d: %s: " format "\n", logger::level_to_str(logger::l), logger::APP_NAME, logger::INSTANCE_NAME, FILE_NAME, __LINE__, __func__, ##__VA_ARGS__)
 
