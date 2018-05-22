@@ -8,9 +8,6 @@
 options::options(const std::string& domain, int argc, char* argv[])
 	: domain_(domain)
 {
-	if (!logger::APP_NAME)
-		logger::APP_NAME = logger::file_name(argv[0]);
-
 	int opt;
 	std::string cfg = "/etc/mqtt-devices.lua.conf";
 
@@ -36,7 +33,7 @@ options::options(const std::string& domain, int argc, char* argv[])
 
 	name_ = argv[optind];
 
-	logger::init(argv[0], argv[optind]);
+	logger::init(logger::file_name(argv[0]), argv[optind]);
 
 	LOG(info, "client id '%s'", name_.c_str());
 	LOG(info, "domain '%s'", domain.c_str());

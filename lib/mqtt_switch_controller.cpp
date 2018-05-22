@@ -80,8 +80,10 @@ void mqtt_switch_controller::handle_command(mqtt::const_message_ptr msg)
 			return;
 		}
 
-		switch_.set_channel_state(channel,
-			process_command(msg->get_payload(), switch_.get_channel_state(channel)));
+		size_t channel_state = switch_.get_channel_state(channel);
+		size_t value = process_command(msg->get_payload(), channel_state);
+		switch_.set_channel_state(channel, value);
+		LOG(info, "channel %zu: %zu -> %zu", channel, channel_state, value);
 
 		parts[3] = "state";
 		std::string state = boost::lexical_cast<std::string>(switch_.get_channel_state(channel));

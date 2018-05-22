@@ -39,16 +39,6 @@ namespace logger
 		return "NIL";
 	}
 
-#if 0
-	inline void out(level, const char* format, ...)
-	{
-		va_list args;
-		va_start(args, format);
-		vprintf(format, args);
-		va_end(args);
-	}
-#endif
-
 	inline int level_to_syslog(level l)
 	{
 		switch(l)
@@ -65,7 +55,9 @@ namespace logger
 	{
 		va_list args;
 		va_start(args, format);
-		vsyslog(level_to_syslog(l), format, args);
+		if (false)
+			vsyslog(level_to_syslog(l), format, args);
+		vprintf(format, args);
 		va_end(args);
 	}
 
@@ -76,7 +68,8 @@ namespace logger
 	{
 		APP_NAME = app_name;
 		INSTANCE_NAME = instance_name;
-		openlog(INSTANCE_NAME, LOG_PERROR, LOG_USER);
+		if (false)
+			openlog(INSTANCE_NAME, LOG_PERROR, LOG_USER);
 	}
 
 } // namespace
