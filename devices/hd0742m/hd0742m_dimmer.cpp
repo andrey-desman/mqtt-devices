@@ -6,7 +6,7 @@ namespace
 {
 
 const uint16_t CONTROL_REG = 0;
-const uint16_t MAX_VALUE = 0x39;
+const uint16_t MAX_VALUE = 0x3f;
 
 }
 
