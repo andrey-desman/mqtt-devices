@@ -22,7 +22,7 @@ public:
 		loop_ = loop;
 	}
 
-	void start(double timeout)
+	void start(lua_Number timeout)
 	{
 		timer_.start(timeout);
 	}
