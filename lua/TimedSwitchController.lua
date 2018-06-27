@@ -9,8 +9,13 @@ end
 
 function CTimedSwitchController:__call(event)
 	if event == EV_KEY_PRESS then
-		self.switch:on()
-		self.timer:start(self.timeout)
+		if self.switch:get_state() == 0 then
+			self.switch:on()
+			self.timer:start(self.timeout)
+		else
+			self.switch:off()
+			self.timer:stop()
+		end
 	end
 end
 
