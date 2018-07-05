@@ -7,8 +7,10 @@
 
 lua_host::lua_host(mqtt_connection& conn, ev::loop_ref& loop, const std::string& main_dir, const std::string& config_file)
 	: connection_(conn)
-	, L_(true)
+	, l_(luaL_newstate())
+	, L_(l_)
 {
+	luaL_openlibs(l_);
 	using namespace std::placeholders;
 	conn.set_on_connected(std::bind(&lua_host::subscribe, this));
 	conn.set_on_message(std::bind(&lua_host::handle_event, this, _1));
@@ -42,6 +44,7 @@ lua_host::~lua_host()
 		connection_.client().unsubscribe("+/switch/+/state")->wait();
 		connection_.client().unsubscribe("+/event/+")->wait();
 	});
+	lua_close(l_);
 }
 
 void lua_host::subscribe()
@@ -87,7 +90,13 @@ void lua_host::send_switch_command(std::string s, int channel, std::string comma
 
 void lua_host::log(std::string s)
 {
-	LOG(info, "%s", s.c_str());
+	lua_Debug info;
+	int level = 0;
+	if (lua_getstack(l_, 1, &info))
+	{
+		lua_getinfo(l_, "nSl", &info);
+		LOGL(info, logger::file_name(info.short_src), info.currentline, (info.name ? info.name : "<unknown>"), "%s", s.c_str());
+	}
 }
 
 

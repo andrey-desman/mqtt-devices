@@ -27,6 +27,7 @@ private:
 
 private:
 	mqtt_connection& connection_;
+	lua_State* l_;
 	sel::State L_;
 };
 
