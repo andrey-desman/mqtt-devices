@@ -4,6 +4,7 @@
 #include <fcntl.h>
 
 #include <algorithm>
+#include <functional>
 #include <cstring>
 
 kmtronic_usb_relay::kmtronic_usb_relay(const std::string& dev_path)

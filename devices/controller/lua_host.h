@@ -23,6 +23,7 @@ private:
 	void handle_event(mqtt::const_message_ptr msg);
 
 	void send_switch_command(std::string s, int channel, std::string command);
+	void log(std::string s);
 
 private:
 	mqtt_connection& connection_;

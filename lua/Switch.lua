@@ -11,43 +11,60 @@ function CSwitch:__call(state)
 	end
 end
 
-function CSwitch.new(switch, channel)
+function CSwitch.new(name, device, channel)
    local s = {}
    setmetatable(s, CSwitch)
-   s.switch = switch
+   s.name = name
+   s.device = device
    s.channel = channel
    s.state = 0
    return s
 end
 
 function CSwitch:toggle()
-	bus.send_switch_command(self.switch, self.channel, 'toggle')
+	bus.send_switch_command(self.device, self.channel, 'toggle')
 end
 
 function CSwitch:on()
-	bus.send_switch_command(self.switch, self.channel, 'on')
+	bus.send_switch_command(self.device, self.channel, 'on')
 end
 
 function CSwitch:off()
-	bus.send_switch_command(self.switch, self.channel, 'off')
+	bus.send_switch_command(self.device, self.channel, 'off')
 end
 
 function CSwitch:set(value)
-	bus.send_switch_command(self.switch, self.channel, 'set ' .. value)
+	bus.send_switch_command(self.device, self.channel, 'set ' .. value)
 end
 
 function CSwitch:inc(delta)
 	delta = delta or 10
-	bus.send_switch_command(self.switch, self.channel, 'inc ' .. delta)
+	bus.send_switch_command(self.device, self.channel, 'inc ' .. delta)
 end
 
 function CSwitch:dec(delta)
 	delta = delta or 10
-	bus.send_switch_command(self.switch, self.channel, 'dec ' .. delta)
+	bus.send_switch_command(self.device, self.channel, 'dec ' .. delta)
 end
 
 function CSwitch:get_state()
 	return self.state
+end
+
+function CSwitch:get_name()
+	return self.name
+end
+
+function CSwitch:get_device()
+	return self.device
+end
+
+function CSwitch:get_channel()
+	return self.channel
+end
+
+function CSwitch:pretty_name()
+	return self.name .. '(' .. self.device .. '/' .. self.channel .. ')'
 end
 
 function Switch(t)
@@ -55,7 +72,7 @@ function Switch(t)
 	assert(t.device, "SwitchController: Missing device")
 	assert(t.channel, "SwitchController: Missing channel")
 
-	s = CSwitch.new(t.device, t.channel)
+	s = CSwitch.new(t.name, t.device, t.channel)
 	switches[t.name] = s
 	switches[id(t.device, t.channel)] = s
 

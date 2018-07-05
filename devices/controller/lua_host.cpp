@@ -1,6 +1,7 @@
 #include "lua_host.h"
 #include "lua_timer.h"
 #include "util.h"
+#include "log.h"
 
 #include <boost/algorithm/string/split.hpp>
 
@@ -20,7 +21,8 @@ lua_host::lua_host(mqtt_connection& conn, ev::loop_ref& loop, const std::string&
 	L_["EV_KEY_REPEAT"] = 2;
 
 	L_["bus"].SetObj(*this,
-		"send_switch_command", &lua_host::send_switch_command);
+		"send_switch_command", &lua_host::send_switch_command,
+		"log", &lua_host::log);
 
 	L_["Timer"].SetClass<LuaTimer, sel::function<void ()> >(
 		"start", &LuaTimer::start,
@@ -81,6 +83,11 @@ void lua_host::send_switch_command(std::string s, int channel, std::string comma
 		connection_.client().publish(s + "/switch/" + boost::lexical_cast<std::string>(channel) + "/command",
 			command.c_str(), command.size(), 0, false)->wait();
 	});
+}
+
+void lua_host::log(std::string s)
+{
+	LOG(info, "%s", s.c_str());
 }
 
 
