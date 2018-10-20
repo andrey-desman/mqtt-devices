@@ -1,11 +1,17 @@
 #pragma once
 
-#include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
-
 #include <system_error>
 #include <stdexcept>
-#include <vector>
+#include <memory>
+
+#include <unistd.h>
+
+struct fd_deleter
+{
+	void operator()(int* fd) { close(*fd); }
+};
+
+typedef std::unique_ptr<int, fd_deleter> fd_guard;
 
 template<typename T>
 inline void noexception(const T& f)

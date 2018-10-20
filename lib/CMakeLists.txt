@@ -1,4 +1,4 @@
-add_library(mqtt-device SHARED mqtt_switch_controller.cpp mqtt_connection.cpp mqtt_app.cpp mbus_switch.cpp options.cpp log.cpp)
+add_library(mqtt-device SHARED mqtt_switch_controller.cpp mqtt_connection.cpp mqtt_app.cpp mbus_switch.cpp options.cpp log.cpp crc16arc.cpp serial.cpp)
 target_link_libraries(mqtt-device ${PAHO_CPP_LIB} ${EV_LIB} ${MODBUS_LIB} ${LUA_LIB})
 
 install(TARGETS mqtt-device

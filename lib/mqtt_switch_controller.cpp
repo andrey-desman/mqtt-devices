@@ -58,7 +58,9 @@ size_t mqtt_switch_controller::process_command(const std::string& command, size_
 		 if (cmd == "inc")    return increase(value, get_delta());
 	else if (cmd == "dec")    return decrease(value, get_delta());
 	else if (cmd == "on")     return 100;
+	else if (cmd == "close")  return 100;
 	else if (cmd == "off")    return 0;
+	else if (cmd == "open")   return 0;
 	else if (cmd == "toggle") return value ? 0 : 100;
 	else if (cmd == "nop")    return value;
 	else if (cmd == "set")    return boost::lexical_cast<size_t>(parts.at(1));

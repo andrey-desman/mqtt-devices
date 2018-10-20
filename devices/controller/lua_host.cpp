@@ -4,6 +4,7 @@
 #include "log.h"
 
 #include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
 
 lua_host::lua_host(mqtt_connection& conn, ev::loop_ref& loop, const std::string& main_dir, const std::string& config_file)
 	: connection_(conn)

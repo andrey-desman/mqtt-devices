@@ -62,6 +62,9 @@ target_link_libraries(mqtt_sample_switch mqtt-device)
 add_executable(mqtt_kmtronic_usb_relay devices/kmtronic/kmtronic_usb_relay.cpp devices/kmtronic/main.cpp)
 target_link_libraries(mqtt_kmtronic_usb_relay mqtt-device)
 
+add_executable(mqtt_am82tv devices/am82tv/am82tv.cpp devices/am82tv/main.cpp)
+target_link_libraries(mqtt_am82tv mqtt-device)
+
 add_executable(mqtt_hd0742m_dimmer devices/hd0742m/hd0742m_dimmer.cpp devices/hd0742m/main.cpp)
 target_link_libraries(mqtt_hd0742m_dimmer mqtt-device)
 
