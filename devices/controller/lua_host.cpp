@@ -23,9 +23,11 @@ lua_host::lua_host(mqtt_connection& conn, ev::loop_ref& loop, const std::string&
 	L_["EV_KEY_PRESS"] = 1;
 	L_["EV_KEY_REPEAT"] = 2;
 
-	L_["bus"].SetObj(*this,
-		"send_switch_command", &lua_host::send_switch_command,
-		"log", &lua_host::log);
+	L_["Log"].SetObj(*this, "log", &lua_host::log);
+
+	L_["Mqtt"].SetObj(*this,
+		"subscribe", &lua_host::mqtt_subscribe,
+		"post", &lua_host::mqtt_post);
 
 	L_["Timer"].SetClass<LuaTimer, sel::function<void ()> >(
 		"start", &LuaTimer::start,
@@ -42,8 +44,8 @@ lua_host::~lua_host()
 
 	noexception([this]
 	{
-		connection_.client().unsubscribe("+/switch/+/state")->wait();
-		connection_.client().unsubscribe("+/event/+")->wait();
+		for (auto const& i: subscriptions_)
+			connection_.client().unsubscribe(i)->wait();
 	});
 	lua_close(l_);
 }
@@ -52,40 +54,31 @@ void lua_host::subscribe()
 {
 	noexception([this]
 	{
-		connection_.client().subscribe("+/switch/+/state", 0);
-		connection_.client().subscribe("+/event/+", 0);
+		for (auto const& i: subscriptions_)
+			connection_.client().subscribe(i, 0);
 	});
 
 }
 
 void lua_host::handle_event(mqtt::const_message_ptr msg)
 {
-	std::vector<std::string> parts;
-	boost::split(parts, msg->get_topic(), [](char c) { return c == '/'; });
-	const char* function;
-
-	if (parts.at(1) == "switch")
-	{
-		function = "on_switch_state_changed";
-	}
-	else if (parts.at(1) == "event")
-	{
-		function = "on_key_event";
-	}
-	else
-	{
-		return;
-	}
-
-	L_[function](parts.at(0), boost::lexical_cast<int>(parts.at(2)), boost::lexical_cast<int>(msg->get_payload()));
+	L_["Mqtt"]["handle_message"](msg->get_topic(), msg->get_payload());
 }
 
-void lua_host::send_switch_command(std::string s, int channel, std::string command)
+void lua_host::mqtt_post(std::string topic, std::string payload, bool retained)
 {
 	noexception([&]()
 	{
-		connection_.client().publish(s + "/switch/" + boost::lexical_cast<std::string>(channel) + "/command",
-			command.c_str(), command.size(), 0, false)->wait();
+		connection_.client().publish(topic, payload.c_str(), payload.length(), 0, retained)->wait();
+	});
+}
+
+void lua_host::mqtt_subscribe(std::string topic)
+{
+	noexception([&]()
+	{
+		subscriptions_.push_back(topic);
+		connection_.client().subscribe(topic, 0);
 	});
 }
 

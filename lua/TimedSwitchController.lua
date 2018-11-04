@@ -12,7 +12,7 @@ function CTimedSwitchController:__call(event)
 		if self.switch:get_state() == 0 then
 			self.switch:on()
 			self.timer:start(self.timeout)
-			bus.log("Turning off " .. self.switch:pretty_name() .. " after " .. self.timeout .. " seconds")
+			Log.log("Turning off " .. self.switch:pretty_name() .. " after " .. self.timeout .. " seconds")
 		else
 			self.switch:off()
 			self.timer:stop()
@@ -20,7 +20,7 @@ function CTimedSwitchController:__call(event)
 	-- Hanlding long press, but only if it was pressed to turn the switch on initially
 	elseif event == EV_KEY_REPEAT and self.switch:get_state() ~= 0 and self.long_press_timeout ~= nil then
 		self.timer:start(self.long_press_timeout)
-		bus.log("Turning off " .. self.switch:pretty_name() .. " after " .. self.long_press_timeout .. " seconds")
+		Log.log("Turning off " .. self.switch:pretty_name() .. " after " .. self.long_press_timeout .. " seconds")
 	end
 end
 

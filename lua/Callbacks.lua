@@ -22,3 +22,22 @@ function on_key_event(keyboard, key, event)
 	local handler = event_handlers[id(keyboard, key)]
 	if handler then handler(event) end
 end
+
+function Mqtt.handle_message(topic, payload)
+	Log.log("Got message on " .. topic .. ": " .. payload)
+
+	p = string.gmatch(topic, '[^/]+')
+	device = p()
+	class = p()
+	channel = math.tointeger(p())
+	subject = p()
+
+	if class == 'switch' then
+		CSwitch.handle_message(device, channel, subject, payload)
+	elseif class == 'event' then
+		on_key_event(device, channel, math.tointeger(payload))
+	end
+end
+
+Mqtt.subscribe("+/switch/#")
+Mqtt.subscribe("+/event/#")

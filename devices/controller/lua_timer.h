@@ -4,7 +4,7 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-#include <ev++.h>
+#include "ev++17.h"
 #include <selene.h>
 
 class LuaTimer

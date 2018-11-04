@@ -42,7 +42,7 @@ include_directories(lib)
 include_directories(devices)
 
 SET( CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined" )
-SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
+SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++17" )
 
 find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -79,12 +79,6 @@ add_executable(mqtt_controller
 	devices/controller/lua_timer.cpp
 	devices/controller/main.cpp)
 target_link_libraries(mqtt_controller ${LUA_LIB} mqtt-device)
-
-#add_custom_command(
-#    TARGET logic_controller POST_BUILD
-#	COMMAND rm -f ${CMAKE_BINARY_DIR}/lua
-#	COMMAND ln -sf ${CMAKE_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua
-#)
 
 install(TARGETS mqtt_kmtronic_usb_relay mqtt_hd0742m_dimmer mqtt_rs485_2ch_relay mqtt_input mqtt_controller
 	RUNTIME DESTINATION bin

@@ -8,6 +8,9 @@
 
 #include "selene.h"
 
+#include <vector>
+#include <string>
+
 class lua_host
 {
 public:
@@ -22,10 +25,12 @@ private:
 	void subscribe();
 	void handle_event(mqtt::const_message_ptr msg);
 
-	void send_switch_command(std::string s, int channel, std::string command);
+	void mqtt_post(std::string topic, std::string payload, bool retained);
+	void mqtt_subscribe(std::string topic);
 	void log(std::string s);
 
 private:
+	std::vector<std::string> subscriptions_;
 	mqtt_connection& connection_;
 	lua_State* l_;
 	sel::State L_;
