@@ -11,11 +11,11 @@ const uint16_t MAX_VALUE = 0x3f;
 }
 
 hd0742m_dimmer::hd0742m_dimmer(const std::string& server_addr, uint16_t port, uint16_t slave_addr)
-	: mbus_switch(server_addr, port, slave_addr)
+	: device_()
 {
-	std::fill(&state_[0], &state_[CHANNEL_COUNT], 0);
+	device_.reset(modbus_device::create_tcp_device(server_addr, port, slave_addr));
 
-	uint16_t state = read_register(CONTROL_REG);
+	uint16_t state = device_->read_register(CONTROL_REG);
 
 	state_[0] = scale(state >> 8);
 	state_[1] = scale(state & 0xFF);
@@ -41,6 +41,6 @@ void hd0742m_dimmer::set_channel_state(size_t channel, size_t value)
 
 	state_[channel] = value;
 
-	write_register(CONTROL_REG, (rscale(state_[0]) << 8) | rscale(state_[1]));
+	device_->write_register(CONTROL_REG, (rscale(state_[0]) << 8) | rscale(state_[1]));
 }
 

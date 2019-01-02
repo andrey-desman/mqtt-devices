@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iswitch.h"
+#include "serial.h"
 
 #include <memory>
 #include <stdexcept>
@@ -12,9 +13,6 @@ class kmtronic_usb_relay: public iswitch
 
 public:
 	kmtronic_usb_relay(const std::string& dev_path);
-
-	kmtronic_usb_relay(const kmtronic_usb_relay&) = delete;
-	kmtronic_usb_relay& operator =(const kmtronic_usb_relay&) = delete;
 
 	virtual size_t get_channel_count()
 	{
@@ -33,8 +31,10 @@ public:
 	virtual void set_channel_state(size_t channel, size_t value);
 
 private:
+	kmtronic_usb_relay(const kmtronic_usb_relay&) = delete;
+	kmtronic_usb_relay& operator =(const kmtronic_usb_relay&) = delete;
+
 	bool state_[8];
-	int fd_;
-	std::shared_ptr<void> fd_guard_;
+	serial device_;
 };
 

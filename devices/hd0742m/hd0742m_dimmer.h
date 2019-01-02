@@ -1,14 +1,15 @@
 #pragma once
 
-#include "mbus_switch.h"
+#include "modbus_device.h"
+#include "iswitch.h"
 
 #include <memory>
 #include <stdexcept>
 #include <string>
 
-class hd0742m_dimmer: public mbus_switch
+class hd0742m_dimmer: public iswitch
 {
-	static const size_t CHANNEL_COUNT = 2;
+	static constexpr size_t CHANNEL_COUNT = 2;
 
 public:
 	hd0742m_dimmer(const std::string& server_addr, uint16_t port, uint16_t slave_addr);
@@ -37,6 +38,7 @@ private:
 	static uint16_t rscale(size_t value);
 
 private:
-	size_t state_[CHANNEL_COUNT];
+	std::unique_ptr<modbus_device> device_;
+	size_t state_[CHANNEL_COUNT]{};
 };
 

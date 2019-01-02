@@ -1,13 +1,15 @@
 #pragma once
 
-#include "mbus_switch.h"
+#include "modbus_device.h"
+#include "iswitch.h"
 
 #include <stdexcept>
 #include <string>
+#include <memory>
 
-class rs485_2ch_relay: public mbus_switch
+class rs485_2ch_relay: public iswitch
 {
-	static const size_t CHANNEL_COUNT = 2;
+	static constexpr size_t CHANNEL_COUNT = 2;
 
 public:
 	rs485_2ch_relay(const std::string& server_addr, uint16_t port, uint16_t slave_addr);
@@ -28,6 +30,7 @@ public:
 	virtual void set_channel_state(size_t channel, size_t value);
 
 private:
-	bool state_[CHANNEL_COUNT];
+	std::unique_ptr<modbus_device> device_;
+	bool state_[CHANNEL_COUNT]{};
 };
 
