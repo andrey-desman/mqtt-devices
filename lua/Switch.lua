@@ -33,7 +33,7 @@ function CSwitch:handle_state(state)
 		Log.log('switch ' .. self:pretty_name() .. ': invalid state received: ' .. state)
 		return
 	else
-		Log.log('switch ' .. self:pretty_name() .. ': ' .. self:state .. ' -> ' .. state)
+		Log.log('switch ' .. self:pretty_name() .. ': ' .. self.state .. ' -> ' .. state)
 	end
 	self.state = state
 

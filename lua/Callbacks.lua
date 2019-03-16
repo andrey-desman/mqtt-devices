@@ -31,7 +31,7 @@ function Mqtt.handle_message(topic, payload)
 	class = p()
 	channel = math.tointeger(p())
 	subject = p()
-
+	Log.log("device: " .. device .. ", class: " .. class .. ", ch: " .. channel .. ", subj: " .. (subject or 'n/a'))
 	if class == 'switch' then
 		CSwitch.handle_message(device, channel, subject, payload)
 	elseif class == 'event' then
