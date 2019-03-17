@@ -13,9 +13,7 @@ class rs485_2ch_relay: public iswitch
 
 public:
 	rs485_2ch_relay(const std::string& server_addr, uint16_t port, uint16_t slave_addr);
-
-	rs485_2ch_relay(const rs485_2ch_relay&) = delete;
-	rs485_2ch_relay& operator =(const rs485_2ch_relay&) = delete;
+	rs485_2ch_relay(const std::string& serial_path, uint16_t slave_addr);
 
 	virtual size_t get_channel_count()
 	{
@@ -30,6 +28,9 @@ public:
 	virtual void set_channel_state(size_t channel, size_t value);
 
 private:
+	rs485_2ch_relay(const rs485_2ch_relay&) = delete;
+	rs485_2ch_relay& operator =(const rs485_2ch_relay&) = delete;
+
 	std::unique_ptr<modbus_device> device_;
 	bool state_[CHANNEL_COUNT]{};
 };

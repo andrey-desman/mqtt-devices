@@ -13,6 +13,7 @@ class hd0742m_dimmer: public iswitch
 
 public:
 	hd0742m_dimmer(const std::string& server_addr, uint16_t port, uint16_t slave_addr);
+	hd0742m_dimmer(const std::string& serial_path, uint16_t slave_addr);
 
 	hd0742m_dimmer(const hd0742m_dimmer&) = delete;
 	hd0742m_dimmer& operator =(const hd0742m_dimmer&) = delete;
@@ -34,6 +35,8 @@ public:
 	virtual void set_channel_state(size_t channel, size_t value);
 
 private:
+	void read_state();
+
 	static size_t scale(uint16_t hw_value);
 	static uint16_t rscale(size_t value);
 
