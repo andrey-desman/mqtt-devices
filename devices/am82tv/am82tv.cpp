@@ -1,5 +1,6 @@
 #include "am82tv.h"
 #include "crc16arc.h"
+#include "log.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -44,11 +45,15 @@ int am82tv::control(Control::Command cmd)
 	std::vector<uint8_t> command = {PREFIX, uint8_t(slave_addr_ >> 8), uint8_t(slave_addr_), Operation::Control, cmd};
 	append_crc16(command);
 
+	serial::scoped_lock l(&device_);
+
 	if (device_.write(command.data(), command.size()) == command.size())
 	{
 		std::vector<uint8_t> reply(command.size());
 		if (device_.read_exact(&command[0], command.size()) && reply == command)
 			return true;
+		else
+			LOG(error, "Failed to read response from am82tv");
 	}
 	return false;
 }
