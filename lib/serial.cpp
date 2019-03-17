@@ -97,13 +97,19 @@ void intrusive_ptr_add_ref(serial* s)
 {
 	check(s->fd_, "device is not opened");
 	if (s->lock_count_++ == 0)
+	{
+		LOG(error, "lock %d", s->fd_);
 		lockf(s->fd_, F_LOCK, 0);
+	}
 }
 
 void intrusive_ptr_release(serial* s)
 {
 	check(s->fd_, "device is not opened");
 	if (--s->lock_count_ == 0)
+	{
+		LOG(error, "unlock %d", s->fd_);
 		lockf(s->fd_, F_ULOCK, 0);
+	}
 }
 
