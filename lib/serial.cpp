@@ -52,6 +52,28 @@ ssize_t serial::read(void* buffer, size_t count) const
 	return 0;
 }
 
+bool serial::read_exact(void* buffer, size_t count) const
+{
+	check(fd_, "device is not opened");
+	std::chrono::milliseconds timeout(timeout_);
+	while (count)
+	{
+		int bytes_read = ::read(fd_, buffer, count);
+		if (bytes_read == -1)
+		{
+			if (would_block() && poll(POLLIN, timeout))
+				continue;
+			else
+				return false;
+		}
+		else
+		{
+			count -= bytes_read;
+		}
+	}
+	return true;
+}
+
 ssize_t serial::write(const void* buffer, size_t count) const
 {
 	check(fd_, "device is not opened");
@@ -98,7 +120,7 @@ void intrusive_ptr_add_ref(serial* s)
 	check(s->fd_, "device is not opened");
 	if (s->lock_count_++ == 0)
 	{
-		LOG(error, "lock %d", s->fd_);
+		LOG(debug, "lock %d", s->fd_);
 		lockf(s->fd_, F_LOCK, 0);
 	}
 }
@@ -108,7 +130,7 @@ void intrusive_ptr_release(serial* s)
 	check(s->fd_, "device is not opened");
 	if (--s->lock_count_ == 0)
 	{
-		LOG(error, "unlock %d", s->fd_);
+		LOG(debug, "unlock %d", s->fd_);
 		lockf(s->fd_, F_ULOCK, 0);
 	}
 }

@@ -8,6 +8,7 @@ int main(int argc, char* argv[])
 	std::string broker;
 	std::string client_id;
 	std::string dev_path;
+	uint16_t slave_addr = 0;
 
 	try
 	{
@@ -15,7 +16,8 @@ int main(int argc, char* argv[])
 
 		broker = opt.get("broker", options::scope_global, std::string("localhost"));
 		client_id = opt.get_name();
-		dev_path = opt.get<std::string>("device", options::scope_device);
+		dev_path = opt.get<std::string>("device", options::scope_domain);
+		slave_addr = opt.get<int>("slave_addr", options::scope_device);
 	}
 	catch (const std::exception&)
 	{
@@ -23,7 +25,7 @@ int main(int argc, char* argv[])
 	}
 
 	ev::default_loop loop;
-	am82tv motor(dev_path);
+	am82tv motor(dev_path, slave_addr);
 
 	mqtt_switch_app app(loop, broker, client_id, motor);
 

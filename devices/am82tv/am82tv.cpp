@@ -10,18 +10,13 @@
 
 constexpr unsigned char PREFIX = 0x55;
 
-am82tv::am82tv(const std::string& dev_path)
+am82tv::am82tv(const std::string& dev_path, uint16_t slave_addr)
+	: slave_addr_(slave_addr)
 {
 	state_ = 0;
-
-	fd_ = open(dev_path.c_str(), O_WRONLY);
-
-	if (fd_ == -1)
-	{
+	device_.open(dev_path.c_str(), O_WRONLY);
+	if (!device_)
 		throw std::runtime_error(strerror(errno));
-	}
-
-	fd_guard_ = std::shared_ptr<void>(0, std::bind(&close, fd_));
 }
 
 void am82tv::set_channel_state(size_t channel, size_t value)
@@ -31,21 +26,11 @@ void am82tv::set_channel_state(size_t channel, size_t value)
 		throw std::runtime_error("am82tv: channel is out of bounds");
 	}
 
-	state_ = value;
-#if 0
-	unsigned char cmd[3] = {0xff, static_cast<unsigned char>(channel + 1), state_[channel]};
-
-	if (write(fd_, &cmd, sizeof(cmd)) == -1)
-	{
-		throw std::runtime_error(strerror(errno));
-	}
-#endif
+	if (value)
+		control(Control::Open);
+	else
+		control(Control::Close);
 }
-
-// std::vector am82tv::init_command()
-// {
-	// std::vector<uint8_t> command
-// }
 
 void am82tv::append_crc16(std::vector<uint8_t>& command)
 {
@@ -56,16 +41,19 @@ void am82tv::append_crc16(std::vector<uint8_t>& command)
 
 int am82tv::control(Control::Command cmd)
 {
-	std::vector<uint8_t> command = {PREFIX, 0xfe, 0xfe, Operation::Control, cmd};
+	std::vector<uint8_t> command = {PREFIX, uint8_t(slave_addr_ >> 8), uint8_t(slave_addr_), Operation::Control, cmd};
 	append_crc16(command);
 
-	if (write(fd_, command.data(), command.size()) == command.size())
+	if (device_.write(command.data(), command.size()) == command.size())
 	{
-		
+		std::vector<uint8_t> reply(command.size());
+		if (device_.read_exact(&command[0], command.size()) && reply == command)
+			return true;
 	}
 	return false;
 }
 
+#if 0
 int am82tv::read_state()
 {
 	unsigned char cmd[] = {PREFIX, 0xfe, 0xfe, 1, 2, 1, 0, 0};
@@ -79,4 +67,5 @@ int am82tv::read_state()
 		throw std::runtime_error(strerror(errno));
 	}
 }
+#endif
 

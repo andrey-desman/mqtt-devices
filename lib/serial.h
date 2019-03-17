@@ -16,6 +16,7 @@ public:
 
 	void open(const char* pathname, int flags);
 	ssize_t read(void* buffer, size_t count) const;
+	bool read_exact(void* buffer, size_t count) const;
 	ssize_t write(const void* buffer, size_t count) const;
 
 	int fd() const { return fd_; }
