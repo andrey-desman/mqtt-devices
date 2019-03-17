@@ -55,9 +55,10 @@ namespace logger
 	{
 		va_list args;
 		va_start(args, format);
-		if (false)
+		if (true)
 			vsyslog(level_to_syslog(l), format, args);
-		vprintf(format, args);
+		else
+			vprintf(format, args);
 		va_end(args);
 	}
 
