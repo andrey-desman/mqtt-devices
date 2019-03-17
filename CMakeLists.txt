@@ -80,7 +80,7 @@ add_executable(mqtt_controller
 	devices/controller/main.cpp)
 target_link_libraries(mqtt_controller ${LUA_LIB} mqtt-device)
 
-install(TARGETS mqtt_kmtronic_usb_relay mqtt_hd0742m_dimmer mqtt_rs485_2ch_relay mqtt_input mqtt_controller
+install(TARGETS mqtt_kmtronic_usb_relay mqtt_hd0742m_dimmer mqtt_rs485_2ch_relay mqtt_am82tv mqtt_input mqtt_controller
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib)
 
