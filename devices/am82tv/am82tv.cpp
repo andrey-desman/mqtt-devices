@@ -31,6 +31,7 @@ void am82tv::set_channel_state(size_t channel, size_t value)
 		control(Control::Open);
 	else
 		control(Control::Close);
+	state_ = value;
 }
 
 void am82tv::append_crc16(std::vector<uint8_t>& command)
