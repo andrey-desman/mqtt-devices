@@ -11,8 +11,9 @@
 
 constexpr unsigned char PREFIX = 0x55;
 
-am82tv::am82tv(const std::string& dev_path, uint16_t slave_addr)
+am82tv::am82tv(const std::string& dev_path, uint16_t slave_addr, bool inverse)
 	: slave_addr_(slave_addr)
+	, inverse_(inverse)
 {
 	state_ = 0;
 	device_.open(dev_path.c_str(), O_WRONLY);
@@ -27,10 +28,13 @@ void am82tv::set_channel_state(size_t channel, size_t value)
 		throw std::runtime_error("am82tv: channel is out of bounds");
 	}
 
+	if (inverse_)
+		value = 100 - value;
+
 	if (value == 0)
-		control(Control::Close);
-	else if (value == 100)
 		control(Control::Open);
+	else if (value == 100)
+		control(Control::Close);
 	else
 		control(Control::Set, value);
 	state_ = value;

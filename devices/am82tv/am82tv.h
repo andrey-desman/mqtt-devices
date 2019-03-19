@@ -11,7 +11,7 @@
 class am82tv: public iswitch
 {
 public:
-	am82tv(const std::string& dev_path, uint16_t slave_addr);
+	am82tv(const std::string& dev_path, uint16_t slave_addr, bool inverse);
 
 	am82tv(const am82tv&) = delete;
 	am82tv& operator =(const am82tv&) = delete;
@@ -64,5 +64,6 @@ private:
 	uint16_t slave_addr_;
 	int state_;
 	serial device_;
+	bool inverse_;
 };
 
