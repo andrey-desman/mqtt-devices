@@ -47,7 +47,7 @@ int am82tv::control(Control::Command cmd, uint8_t value)
 {
 	std::vector<uint8_t> command = {PREFIX, uint8_t(slave_addr_ >> 8), uint8_t(slave_addr_), Operation::Control, cmd};
 	if (cmd == Control::Set)
-		command.append(value);
+		command.push_back(value);
 	append_crc16(command);
 
 	serial::scoped_lock l(&device_);
