@@ -28,9 +28,9 @@ void am82tv::set_channel_state(size_t channel, size_t value)
 	}
 
 	if (value == 0)
-		control(Control::Open);
-	else if (value == 100)
 		control(Control::Close);
+	else if (value == 100)
+		control(Control::Open);
 	else
 		control(Control::Set, value);
 	state_ = value;
