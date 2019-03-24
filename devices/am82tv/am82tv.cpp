@@ -28,6 +28,8 @@ void am82tv::set_channel_state(size_t channel, size_t value)
 		throw std::runtime_error("am82tv: channel is out of bounds");
 	}
 
+	state_ = value;
+
 	if (inverse_)
 		value = 100 - value;
 
@@ -37,7 +39,6 @@ void am82tv::set_channel_state(size_t channel, size_t value)
 		control(Control::Open);
 	else
 		control(Control::Set, value);
-	state_ = value;
 }
 
 void am82tv::append_crc16(std::vector<uint8_t>& command)
@@ -47,7 +48,7 @@ void am82tv::append_crc16(std::vector<uint8_t>& command)
 	command.push_back(crc >> 8);
 }
 
-int am82tv::control(Control::Command cmd, uint8_t value)
+bool am82tv::control(Control::Command cmd, uint8_t value)
 {
 	std::vector<uint8_t> command = {PREFIX, uint8_t(slave_addr_ >> 8), uint8_t(slave_addr_), Operation::Control, cmd};
 	if (cmd == Control::Set)
@@ -60,9 +61,15 @@ int am82tv::control(Control::Command cmd, uint8_t value)
 	{
 		std::vector<uint8_t> reply(command.size());
 		if (device_.read_exact(&reply[0], reply.size()) && reply == command)
+		{
 			return true;
+		}
 		else
+		{
 			LOG(error, "Failed to read response from am82tv");
+			LOGHEX(error, "Expected: ", &command[0], command.size());
+			LOGHEX(error, "Got: ", &reply[0], reply.size());
+		}
 	}
 	return false;
 }

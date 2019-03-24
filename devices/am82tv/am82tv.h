@@ -56,7 +56,7 @@ private:
 	};
 
 	void append_crc16(std::vector<uint8_t>& command);
-	int control(Control::Command cmd, uint8_t value = 0);
+	bool control(Control::Command cmd, uint8_t value = 0);
 #if 0
 	int read_state();
 #endif

@@ -4,6 +4,8 @@
 
 #include <cstdio>
 #include <cstdarg>
+#include <iomanip>
+#include <sstream>
 
 namespace logger
 {
@@ -62,6 +64,15 @@ namespace logger
 		va_end(args);
 	}
 
+	inline std::string hexdump(unsigned char const* ptr, size_t size)
+	{
+		std::ostringstream str;
+		str << std::uppercase << std::setfill('0') << std::setw(2) << std::hex;
+		for (size_t i = 0; i < size; ++i)
+			str << static_cast<int>(ptr[i]);
+		return str.str();
+	}
+
 	extern const char* APP_NAME;
 	extern const char* INSTANCE_NAME;
 
@@ -78,5 +89,6 @@ namespace logger
 #define FILE_NAME ({const char* fn = logger::file_name(__FILE__); fn;})
 
 #define LOG(l, format, ...) logger::out(logger::l, "[%s] [%s/%s] %s:%d: %s: " format "\n", logger::level_to_str(logger::l), logger::APP_NAME, logger::INSTANCE_NAME, FILE_NAME, __LINE__, __func__, ##__VA_ARGS__)
+#define LOGHEX(l, msg, ptr, size) logger::out(logger::l, "[%s] [%s/%s] %s:%d: %s: " msg "%s\n", logger::level_to_str(logger::l), logger::APP_NAME, logger::INSTANCE_NAME, FILE_NAME, __LINE__, __func__, logger::hexdump(ptr, size).c_str())
 #define LOGL(l, fn, line, func, format, ...) logger::out(logger::l, "[%s] [%s/%s] %s:%d: %s: " format "\n", logger::level_to_str(logger::l), logger::APP_NAME, logger::INSTANCE_NAME, fn, line, func, ##__VA_ARGS__)
 
