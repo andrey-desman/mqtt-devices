@@ -3,6 +3,7 @@
 #include <system_error>
 #include <stdexcept>
 #include <memory>
+#include <string_view>
 
 #include <unistd.h>
 
@@ -35,5 +36,17 @@ inline void check(void* p, const char* message)
 {
 	if (!p)
 		throw std::runtime_error(message);
+}
+
+template<typename T>
+std::string_view split(std::string_view& str, T delimiter)
+{
+	std::string_view::size_type pos = str.find_first_not_of(delimiter);
+	if (pos == std::string_view::npos)
+		return str = std::string_view();
+	str.remove_prefix(pos);
+	std::string_view res = str.substr(0, str.find_first_of(delimiter));
+	str.remove_prefix(res.length());
+	return res;
 }
 
