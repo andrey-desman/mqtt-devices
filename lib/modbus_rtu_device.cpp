@@ -21,6 +21,7 @@ modbus_rtu_device::modbus_rtu_device(const std::string& tty_path, uint16_t slave
 
 modbus_rtu_device::~modbus_rtu_device()
 {
+	modbus_set_socket(modbus_, -1);
 	modbus_free(modbus_);
 }
 

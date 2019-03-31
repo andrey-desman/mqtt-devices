@@ -3,7 +3,7 @@
 #include <system_error>
 #include <stdexcept>
 #include <memory>
-#include <string_view>
+// #include <string_view>
 
 #include <unistd.h>
 
@@ -38,6 +38,7 @@ inline void check(void* p, const char* message)
 		throw std::runtime_error(message);
 }
 
+#if 0
 template<typename T>
 std::string_view split(std::string_view& str, T delimiter)
 {
@@ -49,4 +50,4 @@ std::string_view split(std::string_view& str, T delimiter)
 	str.remove_prefix(res.length());
 	return res;
 }
-
+#endif

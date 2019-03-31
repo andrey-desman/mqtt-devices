@@ -16,7 +16,7 @@ am82tv::am82tv(const std::string& dev_path, uint16_t slave_addr, bool inverse)
 	, inverse_(inverse)
 {
 	state_ = 0;
-	device_.open(dev_path.c_str(), O_WRONLY);
+	device_.open(dev_path.c_str(), O_RDWR);
 	if (!device_)
 		throw std::runtime_error(strerror(errno));
 }

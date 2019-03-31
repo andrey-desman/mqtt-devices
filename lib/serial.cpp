@@ -2,6 +2,7 @@
 #include "util.h"
 #include "serial.h"
 
+#include <string.h>
 #include <termios.h>
 #include <unistd.h>
 #include <poll.h>
@@ -59,17 +60,19 @@ bool serial::read_exact(void* buffer, size_t count) const
 	while (count)
 	{
 		int bytes_read = ::read(fd_, buffer, count);
-		if (bytes_read == -1)
+
+		if (bytes_read == -1 && !would_block())
 		{
-			if (would_block() && poll(POLLIN, timeout))
-				continue;
-			else
-				return false;
+			int err = errno;
+			LOG(error, "failed to read %d bytes from fd %d, error %d: %s", int(count), fd_,
+				err, strerror(err));
+			return false;
 		}
-		else
-		{
+
+		if (bytes_read > 0)
 			count -= bytes_read;
-		}
+		else if (!poll(POLLIN, timeout))
+			return false;
 	}
 	return true;
 }

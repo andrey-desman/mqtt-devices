@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cinttypes>
+#include <unistd.h>
 #include <chrono>
 #include <boost/intrusive_ptr.hpp>
 

@@ -80,7 +80,7 @@ namespace logger
 	{
 		APP_NAME = app_name;
 		INSTANCE_NAME = instance_name;
-		if (false)
+		if (true)
 			openlog(INSTANCE_NAME, LOG_PERROR, LOG_USER);
 	}
 
