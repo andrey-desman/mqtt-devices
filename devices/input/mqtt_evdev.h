@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ev++17.h"
+#include "util.h"
+
 #include <mqtt/async_client.h>
 
 #include <memory>
@@ -66,7 +68,7 @@ private:
 	std::array<abs_axis, AXIS_COUNT> abs_axis_;
 
 	int fd_;
-	std::shared_ptr<void> fd_guard_;
+	fd_guard fd_guard_;
 	std::string path_;
 	ev::io event_watcher_;
 	std::unordered_map<int, key_repeat_timer> repeat_timers_;

@@ -3,12 +3,19 @@
 #include <cinttypes>
 #include <unistd.h>
 #include <chrono>
-#include <boost/intrusive_ptr.hpp>
+#include <unistd.h>
 
 class serial
 {
 public:
-	using scoped_lock = boost::intrusive_ptr<serial>;
+	class scoped_lock
+	{
+	public:
+		scoped_lock(serial* s) : device_(s) { device_->lock(); }
+		~scoped_lock() { device_->unlock(); }
+	private:
+		serial* device_;
+	};
 
 	serial() = default;
 	~serial()
@@ -28,13 +35,13 @@ protected:
 	serial(const serial&) = delete;
 	serial& operator=(const serial&) = delete;
 
+	void lock();
+	void unlock();
+
 	bool poll(short events, std::chrono::milliseconds& timeout) const;
 
 	std::chrono::milliseconds timeout_{100};
 	int fd_ = -1;
 	int lock_count_ = 0;
-
-	friend void intrusive_ptr_add_ref(serial* s);
-	friend void intrusive_ptr_release(serial* s);
 };
 

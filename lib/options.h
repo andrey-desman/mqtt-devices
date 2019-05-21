@@ -8,9 +8,6 @@
 
 #include "selene.h"
 
-#include <stdexcept>
-#include <boost/lexical_cast.hpp>
-
 class options
 {
 public:

@@ -1,7 +1,6 @@
 #include "mqtt_evdev.h"
 #include "util.h"
 
-#include <boost/lexical_cast.hpp>
 #include <cstdio>
 
 #include <fcntl.h>
@@ -22,7 +21,7 @@ mqtt_evdev::mqtt_evdev(const std::string& event, ev::loop_ref& loop, mqtt::async
 		throw std::runtime_error(strerror(errno));
 	}
 
-	fd_guard_ = std::shared_ptr<void>(0, std::bind(&close, fd_));
+	fd_guard_.reset(&fd_);
 
 	fcntl(fd_, F_SETFL, O_NONBLOCK);
 	grab && ioctl(fd_, EVIOCGRAB, 1);
@@ -72,8 +71,8 @@ void mqtt_evdev::process_event(ev::io& io, int revents)
 void mqtt_evdev::process_key(int code, KeyEvent event)
 {
 	noexception([this, code, event](){
-		std::string payload = boost::lexical_cast<std::string>(event);
-		client_.publish(path_ + boost::lexical_cast<std::string>(code), payload.c_str(), payload.size(), 0, false);
+		std::string payload = std::to_string(event);
+		client_.publish(path_ + std::to_string(code), payload.c_str(), payload.size(), 0, false);
 	});
 
 	if (repeat_[0] == 0)
@@ -121,7 +120,7 @@ void mqtt_evdev::process_repeat(ev::timer& timer, int revents)
 	int code = static_cast<key_repeat_timer&>(timer).code;
 	noexception([this, code]() {
 		std::string payload = "2";
-		client_.publish(path_ + boost::lexical_cast<std::string>(code), payload.c_str(), payload.size(), 0, false);
+		client_.publish(path_ + std::to_string(code), payload.c_str(), payload.size(), 0, false);
 	});
 }
 

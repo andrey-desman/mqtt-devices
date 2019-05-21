@@ -44,9 +44,6 @@ include_directories(devices)
 SET( CMAKE_SHARED_LINKER_FLAGS  "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined" )
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++17" )
 
-find_package(Boost)
-include_directories(${Boost_INCLUDE_DIRS})
-
 find_add_library(MODBUS modbus modbus/modbus.h)
 find_add_library(PAHO_C_ASYNC paho-mqtt3a MQTTAsync.h)
 find_add_library(EV ev ev++.h)

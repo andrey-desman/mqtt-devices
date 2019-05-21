@@ -118,23 +118,23 @@ bool serial::poll(short event, std::chrono::milliseconds& timeout) const
 	return p.revents & event;
 }
 
-void intrusive_ptr_add_ref(serial* s)
+void serial::lock()
 {
-	check(s->fd_, "device is not opened");
-	if (s->lock_count_++ == 0)
+	check(fd_, "device is not opened");
+	if (lock_count_++ == 0)
 	{
-		LOG(debug, "lock %d", s->fd_);
-		lockf(s->fd_, F_LOCK, 0);
+		LOG(debug, "lock %d", fd_);
+		lockf(fd_, F_LOCK, 0);
 	}
 }
 
-void intrusive_ptr_release(serial* s)
+void serial::unlock()
 {
-	check(s->fd_, "device is not opened");
-	if (--s->lock_count_ == 0)
+	check(fd_, "device is not opened");
+	if (--lock_count_ == 0)
 	{
-		LOG(debug, "unlock %d", s->fd_);
-		lockf(s->fd_, F_ULOCK, 0);
+		LOG(debug, "unlock %d", fd_);
+		lockf(fd_, F_ULOCK, 0);
 	}
 }
 

@@ -2,6 +2,8 @@
 
 #include <mqtt/async_client.h>
 
+#include <string_view>
+
 class mqtt_connection;
 class iswitch;
 
@@ -21,7 +23,7 @@ public:
 
 private:
 	void subscribe();
-	size_t process_command(const std::string& command, size_t value);
+	size_t process_command(std::string_view command, size_t value);
 	void handle_command(mqtt::const_message_ptr msg);
 
 	mqtt_connection& connection_;
