@@ -3,7 +3,7 @@ CTimedSwitchController.__index = CTimedSwitchController
 
 function CTimedSwitchController:make_handler()
 	return function()
-		self:on_timer_expired()
+		self.switch:off()
 	end
 end
 
@@ -22,10 +22,6 @@ function CTimedSwitchController:__call(event)
 		self.timer:start(self.long_press_timeout)
 		Log.log("Turning off " .. self.switch:pretty_name() .. " after " .. self.long_press_timeout .. " seconds")
 	end
-end
-
-function CTimedSwitchController:on_timer_expired()
-	self.switch:off()
 end
 
 function CTimedSwitchController.new(switch, timeout, long_press_timeout)

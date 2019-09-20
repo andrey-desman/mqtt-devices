@@ -69,7 +69,8 @@ function CTriSwitch:handle_state(state)
 end
 
 function CTriSwitch:send_state()
-	Mqtt.post(self.device .. "/switch/" .. self.channel .. "/state", self.state == 0 and 0 or self.state - 1, true)
+	Mqtt.post(self.device .. "/switch/" .. self.channel .. "/state", self:get_state(), true)
+	if self.on_state_changed then self.on_state_changed(self:get_state()) end
 end
 
 function CTriSwitch:toggle()
@@ -101,7 +102,7 @@ function CTriSwitch:set(value)
 end
 
 function CTriSwitch:get_state()
-	return self.state
+	return self.state == 0 and 0 or self.state - 1
 end
 
 function CTriSwitch:get_name()
