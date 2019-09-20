@@ -1,7 +1,7 @@
 CTriSwitch = {}
 CTriSwitch.__index = CTriSwitch
 
-function CTriSwitch.new(name, device, channel, power, control)
+function CTriSwitch.new(name, device, channel, power, control, default_value)
    local s = {}
    setmetatable(s, CTriSwitch)
    s.name = name
@@ -10,6 +10,7 @@ function CTriSwitch.new(name, device, channel, power, control)
    s.power = power
    s.control = control
    s.state = 0
+   s.default_value = default_value
    s.power.on_state_changed = function(state) s:on_slave_state_changed() end
    s.control.on_state_changed = s.power.on_state_changed
    return s
@@ -72,11 +73,11 @@ function CTriSwitch:send_state()
 end
 
 function CTriSwitch:toggle()
-	self:set(self.state == 0 and 1 or 0)
+	self:set(self.state == 0 and self.default_value or 0)
 end
 
 function CTriSwitch:on()
-	self:set(1)
+	self:set(self.default_value)
 end
 
 function CTriSwitch:off()
@@ -128,7 +129,7 @@ function TriSwitch(t)
 	assert(t.control, "TriSwitch: Missing control")
 	assert(switches[t.control], "TriSwitch: Unknown switch " .. t.control)
 
-	s = CTriSwitch.new(t.name, t.device, t.channel, switches[t.power], switches[t.control])
+	s = CTriSwitch.new(t.name, t.device, t.channel, switches[t.power], switches[t.control], t.default_value or 1)
 	switches[t.name] = s
 	switches[id(t.device, t.channel)] = s
 end
