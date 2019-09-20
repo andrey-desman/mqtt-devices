@@ -65,6 +65,10 @@ function CSwitch:off()
 	self:send_command('off')
 end
 
+function CSwitch:stop()
+	self:send_command('stop')
+end
+
 function CSwitch:set(value)
 	self:send_command('set ' .. value)
 end
