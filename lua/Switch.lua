@@ -38,14 +38,14 @@ function CSwitch:handle_state(state)
 	self.state = state
 
 	if self.on_state_changed then
-		self:on_state_changed(state)
+		self.on_state_changed(state)
 	end
 end
 
 function CSwitch:handle_command(command)
 	Log.log('switch ' .. self:pretty_name() .. ': got command: ' .. command)
 	if self.on_command then
-		self:on_command(command)
+		self.on_command(command)
 	end
 end
 
