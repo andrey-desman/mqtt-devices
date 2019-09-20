@@ -28,6 +28,11 @@ void am82tv::set_channel_state(size_t channel, size_t value)
 		throw std::runtime_error("am82tv: channel is out of bounds");
 	}
 
+	if (value == -1)
+	{
+		control(Control::Stop);
+		return;
+	}
 	state_ = value;
 
 	if (inverse_)

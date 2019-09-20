@@ -60,6 +60,7 @@ size_t mqtt_switch_controller::process_command(std::string_view command, size_t 
 	else if (cmd == "open"sv)   return 0;
 	else if (cmd == "toggle"sv) return value ? 0 : 100;
 	else if (cmd == "nop"sv)    return value;
+	else if (cmd == "stop"sv)   return -1;
 	else if (cmd == "set"sv)    return cast_to_int<size_t>(arg);
 	else return cast_to_int<size_t>(cmd);
 }
